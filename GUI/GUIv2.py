@@ -415,7 +415,8 @@ class Application(Tk): #main application for the frame
             pmaker.MoveStepperPeriod(1,self.direction,self.Time,self.Flow_uL_s,self)
             pmaker.DismountSpetter(1,self)
 
-            
+        #pmaker.ReportVolume,(pmaker.StepperMotor,pmaker.Steps,pmaker.Period_ms,self)
+
         self.display_text.insert('end',"****Experiment Finish*****************************************\n")
         self.button5.config(state=DISABLED)
         self.display_text.update_idletasks()
@@ -435,10 +436,10 @@ app.title('Microfluid_Ship')
 #windows
 if (sys.platform.startswith('win')): 
     app.iconbitmap('logo.ico')
-else:
+#else:
 #Linux
-    logo = PhotoImage(file='logo.png')
-    app.call('wm', 'iconphoto', self.window._w, logo)
+#    logo = PhotoImage(file='logo.png')
+#    app.call('wm', 'iconphoto', app.window, logo)
 os.chdir(app.directory)
 app.mainloop()
 

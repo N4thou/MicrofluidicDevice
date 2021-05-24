@@ -29,7 +29,8 @@
 
 SoftwareSerial mySerial(10, 11); // RX, TX
 
-
+char buff[100];
+int sizebuff;
 void setup() {
   // Open serial communications and wait for port to open:
   Serial.begin(115200);
@@ -46,10 +47,39 @@ void setup() {
 }
 
 void loop() { // run over and over
-  if (mySerial.available()) {
-    Serial.write(mySerial.read());
+  //if (mySerial.available()) {
+    //Serial.write(mySerial.read());
+  //}
+  //if (Serial.available()) {
+    //mySerial.write(Serial.read());
+  //}
+  int i=0;
+  if(Serial.available()){
+    sizebuff=Serial.readBytes(buff,100);
+  
+  if(buff[0]=='W')
+  {
+    for(i=0;i<sizebuff;i++)
+    {
+      if(buff[i]!=0)
+      {
+        mySerial.write(buff[i]);
+        //Serial.print(buff[i]);
+        buff[i]=0;
+      }
+    }
   }
-  if (Serial.available()) {
-    mySerial.write(Serial.read());
+  }
+  if(mySerial.available()){
+    sizebuff=mySerial.readBytes(buff,100);
+    for(i=0;i<sizebuff-2;i++)
+    {
+     if(buff[i]!=0)
+      {
+        Serial.write(buff[i]);
+        //Serial.print(buff[i]);
+        buff[i]=0;
+      }
+    }
   }
 }

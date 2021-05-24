@@ -23,7 +23,7 @@ def serialList(self):
             return p.device   
     else:
         #For Linux
-        return '/dev/ttyUSB0'
+        return '/dev/ttyS6'
 
 class Parametros():
     def __init__(self):
@@ -62,7 +62,8 @@ class Communication():
     def connect (self):
         self.com = serial.Serial() # Establish the connection on a specific port
         self.com.port= serialList(self)
-        self.com.baudrate= 115200        
+        self.com.baudrate= 115200  
+        self.com.timeout=1      
         self.com.open()
         #Windows        
         if (self.parametros.Windows == True):
@@ -88,18 +89,25 @@ class Communication():
         print(cmd)
         for i in range(len(cmd)):
             self.com.write(cmd[i].encode('utf-8'))
-        return self.ReadComand(app)
+        self.ReadComand(app)
             
     def ReadComand(self,app):
         output_temp=''
-        output=''        
-        while True:
-            temp = self.com.readline().decode('utf-8')
+        output='' 
+        print("read")    
+        i=0   
+        #while i<4:
+            #temp = self.com.read()
+            #buff=temp.decode('utf-8')
             #print(temp)
-            output_temp=output_temp+temp
-            print(output_temp)
-            if ("Done" in output_temp):
-                return output
+            #output_temp=output_temp+buff
+            #print(output_temp)
+            #i=i+1
+            #if ("Done" in output_temp):
+                #return output
+            #    break
+        self.com.read_until(expected='Done')
+        
 
 # Bomba
                 
@@ -126,9 +134,11 @@ class Communication():
         Period_ms=int((1000*Time_s)/Steps)
         Steps=int(Steps)
     
-        cmd = 'W1 M%d D%d S%d T%d' %(StepperMotor, Direction,Steps,Period_ms)   
-        _thread.start_new_thread(self.ReportVolume,(StepperMotor,Steps,Period_ms,app,))
-        self.WriteComand(cmd,app)
+        cmd = 'W1 M%d D%d S%d T%d' %(StepperMotor, Direction,Steps,Period_ms)
+        self.WriteComand(cmd,app)   
+        #_thread.start_new_thread(self.ReportVolume,(StepperMotor,Steps,Period_ms,app,))
+        self.ReportVolume(StepperMotor,Steps,Period_ms,app)
+        #self.WriteComand(cmd,app)
         sleep(1)
         
     
@@ -176,6 +186,7 @@ class Communication():
         sleep(1)
 
     def ReportVolume(self,StepperMotor,Steps,Period_ms,app):
+        print("report")
         start_time = time.time()
         if (StepperMotor==1):
             Vol_uL=Steps/self.parametros.stepper1_StepsXuL
