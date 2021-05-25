@@ -28,6 +28,7 @@
 #include <SoftwareSerial.h>
 
 SoftwareSerial mySerial(10, 11); // RX, TX
+SoftwareSerial mySerial2(5, 6);
 
 char buff[100];
 int sizebuff;
@@ -44,15 +45,10 @@ void setup() {
   // set the data rate for the SoftwareSerial port
   mySerial.begin(115200);
   //mySerial.println("Hello, world?");
+  mySerial2.begin(115200);
 }
 
 void loop() { // run over and over
-  //if (mySerial.available()) {
-    //Serial.write(mySerial.read());
-  //}
-  //if (Serial.available()) {
-    //mySerial.write(Serial.read());
-  //}
   int i=0;
   if(Serial.available()){
     sizebuff=Serial.readBytes(buff,100);
@@ -69,9 +65,62 @@ void loop() { // run over and over
       }
     }
   }
+  else if(buff[0]=='G')
+  {
+    for(i=0;i<sizebuff;i++)
+    {
+      if(buff[i]!=0)
+      {
+        mySerial2.write(buff[i]);
+        //Serial.print(buff[i]);
+        buff[i]=0;
+      }
+    }
+  }
   }
   if(mySerial.available()){
     sizebuff=mySerial.readBytes(buff,100);
+    for(i=0;i<sizebuff;i++)
+    {
+     if(buff[i]!=0)
+      {
+        Serial.write(buff[i]);
+        //Serial.print(buff[i]);
+        buff[i]=0;
+      }
+    }
+  }else if(mySerial2.available()){
+    sizebuff=mySerial2.readBytes(buff,100);
+    for(i=0;i<sizebuff;i++)
+    {
+     if(buff[i]!=0)
+      {
+        Serial.write(buff[i]);
+        //Serial.print(buff[i]);
+        buff[i]=0;
+      }
+    }
+  }
+  /*
+  //int i=0;
+  if(Serial.available()){
+    sizebuff=Serial.readBytes(buff,100);
+  
+  if(buff[0]=='G')
+  {
+    for(i=0;i<sizebuff;i++)
+    {
+      if(buff[i]!=0)
+      {
+        mySerial2.write(buff[i]);
+        //Serial.print(buff[i]);
+        buff[i]=0;
+      }
+    }
+  }
+  }
+  if(mySerial2.available()){
+    sizebuff=mySerial2.readBytes(buff,100);
     for(i=0;i<sizebuff-2;i++)
     {
      if(buff[i]!=0)
@@ -82,4 +131,5 @@ void loop() { // run over and over
       }
     }
   }
+  */
 }
