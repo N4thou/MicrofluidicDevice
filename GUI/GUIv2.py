@@ -1,13 +1,9 @@
 ################################################################################################################
-##########################################Microfluidic device Code v1.3.1.1#####################################
+##########################################Microfluidic device Code #############################################
 ############################################Code Made By Nathanael.T############################################
 ################################################################################################################
 
 ################################Libraries###########################################
-
-#source dir of the programme 
-#import os
-#os.chdir("E:/Stockage/Programation/stage/v1.3.0.4")
 
 import FluidController
 import CameraController
@@ -26,7 +22,7 @@ import numpy as np
 import serial
 import serial.tools.list_ports
 
-#############################need for serial connection################################
+#############################Need for serial connection################################
 def serialList(self):
     
     if (sys.platform == 'win32'):
@@ -72,6 +68,9 @@ class Application(Tk): #main application for the frame
 
         #variable for the connection
         self.com = serial.Serial() # create a Serial object
+        self.com.port= serialList(self) #find the port
+        self.com.baudrate= 115200   #set the speed
+        self.com.timeout=1  #set the timeout (need to not be block when receiving data)
         self.Camera = CameraController.Communication(self.com)
         self.pmaker = FluidController.Communication(self.com)
         
@@ -142,13 +141,12 @@ class Application(Tk): #main application for the frame
         if (self.connected == False):
             self.display_text.insert('end',"Connecting...\n")
             app.display_text.update_idletasks()
-            #pmaker.connect()
             self.connect()
             if(self.com.is_open):
                 self.display_text.delete('0.0','end')
                 sleep(.5)
                 self.display_text.insert('end',"*****************************CONNECTED*****************************\n")
-                self.button0["text"]="Stop & Disconnect"
+                self.button0["text"]="Disconnect"
                 self.button0["bg"]="red"
                 self.connected=True
         else:
@@ -156,9 +154,6 @@ class Application(Tk): #main application for the frame
             self.button7["bg"]="green"
             self.cameraAct=False
             self.vid.__del__()
-            #pmaker.close()
-            #pmaker.connect()
-            #pmaker.close()
             self.disconnect()
             if (self.bussy==True): 
                 self.bussy=False
@@ -170,9 +165,6 @@ class Application(Tk): #main application for the frame
             self.display_text.update_idletasks()
 
     def connect(self):
-        self.com.port= serialList(self) #find the port
-        self.com.baudrate= 115200   #set the speed
-        self.com.timeout=1  #set the timeout (need to not be block when receiving data)
         self.com.open() #start the connection
 
     def disconnect(self):
@@ -260,8 +252,7 @@ class Application(Tk): #main application for the frame
         self.button7["bg"]="green"
         self.cameraAct=False
         self.vid.__del__()
-        #pmaker.close()
-        #pmaker.connect()
+        self.pmaker.stop(app)
         self.bussy=False
         self.display_text.insert('end',"\n****The Test was Interrupted*********************************************\n")  
         self.display_text.update_idletasks() 
@@ -308,9 +299,7 @@ class Application(Tk): #main application for the frame
         self.display_text.insert('end',"New window\n")
         self.cameraAct=True
         MovingCamera=Toplevel()
-        #MovingCamera.geometry("380x130+0+0")
         MovingCamera.wm_title("MoveCamera")
-        #Camera.connect()
         MovingCamera.protocol("WM_DELETE_WINDOW",self.killall)
 
         self.display_text.insert('end',"Cameras activate\n")
@@ -395,7 +384,6 @@ class Application(Tk): #main application for the frame
         self.cameraAct=False
 
     def killall(self):
-        #Camera.disconnect()
         self.desactcam
         self.vid.__del__()
 
@@ -445,8 +433,6 @@ class Application(Tk): #main application for the frame
             self.pmaker.MountSpetter(1,self)
             self.pmaker.MoveStepperPeriod(1,self.direction,self.Time,self.Flow_uL_s,self)
             self.pmaker.DismountSpetter(1,self)
-
-        #pmaker.ReportVolume,(pmaker.StepperMotor,pmaker.Steps,pmaker.Period_ms,self)
 
         self.display_text.insert('end',"****Experiment Finish*****************************************\n")
         self.button5.config(state=DISABLED)

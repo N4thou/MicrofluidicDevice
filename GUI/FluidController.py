@@ -107,6 +107,9 @@ class Communication():
                 #return output
             #    break
         self.com.read_until(expected='Done')
+
+    def stop(self,app):
+        self.WriteComand('WX',app)
         
 
 # Bomba
