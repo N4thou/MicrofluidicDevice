@@ -56,40 +56,40 @@ class Parametros():
         self.Windows = 1
         
 class Communication():
-    def __init__(self):
-        self.parametros = Parametros()        
+    def __init__(self,com):
+        self.parametros = Parametros()
+        self.com = com 
 
-    def connect (self):
-        self.com = serial.Serial() # Establish the connection on a specific port
-        self.com.port= serialList(self)
-        self.com.baudrate= 115200  
-        self.com.timeout=1      
-        self.com.open()
-        #Windows        
-        if (self.parametros.Windows == True):
-            while not self.com.is_open and not self.com.readable():
-                sleep(.5)
+    #def connect (self):
+    #    self.com = serial.Serial() # Establish the connection on a specific port
+    #    self.com.port= serialList(self)
+    #    self.com.baudrate= 115200  
+    #    self.com.timeout=1      
+    #    self.com.open()
+    #    #Windows        
+    #    if (self.parametros.Windows == True):
+    #        while not self.com.is_open and not self.com.readable():
+    #            sleep(.5)
+    #    self.com.flushInput()
+    #    self.com.flushOutput()
+    #    sleep(.8)
 
-        self.com.flushInput()
-        self.com.flushOutput()
-        sleep(.8)
-
-    def is_open (self):
-        print(self.com.is_open)
-        return self.com.is_open
+    #def is_open (self):
+    #    print(self.com.is_open)
+    #    return self.com.is_open
     
     def change_OS(self):
         self.parametros.Windows=abs(self.parametros.Windows-1)
         
-    def close(self):
-        self.com.close()
+    #def close(self):
+    #    self.com.close()
         
     def WriteComand(self,cmd,app):
         cmd=cmd+'\n'
         print(cmd)
         for i in range(len(cmd)):
             self.com.write(cmd[i].encode('utf-8'))
-        self.ReadComand(app)
+        #self.ReadComand(app)
             
     def ReadComand(self,app):
         output_temp=''
@@ -151,8 +151,9 @@ class Communication():
         Steps=int(Steps)
     
         cmd = 'W1 M%d D%d S%d T%d' %(StepperMotor, Direction,Steps,Period_ms)   
-        _thread.start_new_thread(self.ReportVolume,(StepperMotor,Steps,Period_ms,app,))
         self.WriteComand(cmd,app)
+        #_thread.start_new_thread(self.ReportVolume,(StepperMotor,Steps,Period_ms,app,))
+        self.ReportVolume(StepperMotor,Steps,Period_ms,app)
         sleep(1)
 
     def MoveStepperFlujoUpDown(self,StepperMotor,Direction,Vol_uL,Flow_uL_s,uL_Up,uL_Down,app):

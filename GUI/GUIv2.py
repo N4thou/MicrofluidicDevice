@@ -23,7 +23,19 @@ import os
 import cv2 as cv
 from PIL import Image, ImageTk
 import numpy as np
+import serial
+import serial.tools.list_ports
 
+#############################need for serial connection################################
+def serialList(self):
+    
+    if (sys.platform == 'win32'):
+        #Only on Windows
+        for p in serial.tools.list_ports.grep("Arduino"):
+            return p.device   
+    else:
+        #For Linux
+        return '/dev/ttyS6'
 
 ################################Application#############################################
 
@@ -57,6 +69,11 @@ class Application(Tk): #main application for the frame
         self.fps=60
         self.delay=int(1000/self.fps)
         self.create_widgets()
+
+        #variable for the connection
+        self.com = serial.Serial() # create a Serial object
+        self.Camera = CameraController.Communication(self.com)
+        self.pmaker = FluidController.Communication(self.com)
         
 
     def popupmsg(self,msg): 
@@ -125,21 +142,24 @@ class Application(Tk): #main application for the frame
         if (self.connected == False):
             self.display_text.insert('end',"Connecting...\n")
             app.display_text.update_idletasks()
-            pmaker.connect()
-            self.display_text.delete('0.0','end')
-            sleep(.5)
-            self.display_text.insert('end',"*****************************CONNECTED*****************************\n")
-            self.button0["text"]="Stop & Disconnect"
-            self.button0["bg"]="red"
-            self.connected=True
+            #pmaker.connect()
+            self.connect()
+            if(self.com.is_open):
+                self.display_text.delete('0.0','end')
+                sleep(.5)
+                self.display_text.insert('end',"*****************************CONNECTED*****************************\n")
+                self.button0["text"]="Stop & Disconnect"
+                self.button0["bg"]="red"
+                self.connected=True
         else:
             self.rec=False
             self.button7["bg"]="green"
             self.cameraAct=False
             self.vid.__del__()
-            pmaker.close()
-            pmaker.connect()
-            pmaker.close()
+            #pmaker.close()
+            #pmaker.connect()
+            #pmaker.close()
+            self.disconnect()
             if (self.bussy==True): 
                 self.bussy=False
                 self.display_text.insert('end',"\n****The Test was Interrupted*********************************************\n")
@@ -147,7 +167,18 @@ class Application(Tk): #main application for the frame
             self.button0["text"]="Conect"
             self.button0["bg"]="green" 
             self.connected=False   
-            self.display_text.update_idletasks() 
+            self.display_text.update_idletasks()
+
+    def connect(self):
+        self.com.port= serialList(self) #find the port
+        self.com.baudrate= 115200   #set the speed
+        self.com.timeout=1  #set the timeout (need to not be block when receiving data)
+        self.com.open() #start the connection
+
+    def disconnect(self):
+        if self.com.is_open:
+            self.com.close()
+
     
 
 ####################################################Parameters########################################################
@@ -229,8 +260,8 @@ class Application(Tk): #main application for the frame
         self.button7["bg"]="green"
         self.cameraAct=False
         self.vid.__del__()
-        pmaker.close()
-        pmaker.connect()
+        #pmaker.close()
+        #pmaker.connect()
         self.bussy=False
         self.display_text.insert('end',"\n****The Test was Interrupted*********************************************\n")  
         self.display_text.update_idletasks() 
@@ -279,7 +310,7 @@ class Application(Tk): #main application for the frame
         MovingCamera=Toplevel()
         #MovingCamera.geometry("380x130+0+0")
         MovingCamera.wm_title("MoveCamera")
-        Camera.connect()
+        #Camera.connect()
         MovingCamera.protocol("WM_DELETE_WINDOW",self.killall)
 
         self.display_text.insert('end',"Cameras activate\n")
@@ -291,7 +322,7 @@ class Application(Tk): #main application for the frame
         self.rec=False
         self.update_frame()
 
-        button12=Button(MovingCamera,text=" Quit ",command=lambda:[Camera.disconnect(),self.desactcam,self.vid.__del__(),MovingCamera.destroy()],width = self.column_width,bg="gray73")
+        button12=Button(MovingCamera,text=" Quit ",command=lambda:[self.desactcam,self.vid.__del__(),MovingCamera.destroy()],width = self.column_width,bg="gray73")
         button12.grid(row=4,column=0)
         
         button13=Button(MovingCamera,text=" /\ (+y) ",command=self.moveFy,width = self.column_width,bg="gray73")
@@ -328,43 +359,43 @@ class Application(Tk): #main application for the frame
         button23.grid(row=2,column=0)
     
     def moveFx(self):
-        Camera.moveForwardX()
+        self.Camera.moveForwardX()
 
     def moveBx(self):
-        Camera.moveBackwardX()
+        self.Camera.moveBackwardX()
 
     def moveFy(self):
-        Camera.moveForwardY()
+        self.Camera.moveForwardY()
 
     def moveBy(self):
-        Camera.moveBackwardY()
+        self.Camera.moveBackwardY()
 
     def moveFz(self):
-        Camera.moveForwardZ()
+        self.Camera.moveForwardZ()
 
     def moveBz(self):
-        Camera.moveBackwardZ()
+        self.Camera.moveBackwardZ()
     
     def rstPos(self):
-        Camera.resetPos()
+        self.Camera.resetPos()
     
     def x01(self):
-        Camera.ChangeStepps(0.1)
+        self.Camera.ChangeStepps(0.1)
 
     def x1(self):
-        Camera.ChangeStepps(1)
+        self.Camera.ChangeStepps(1)
 
     def x10(self):
-        Camera.ChangeStepps(10)
+        self.Camera.ChangeStepps(10)
 
     def x100(self):
-        Camera.ChangeStepps(100)
+        self.Camera.ChangeStepps(100)
 
     def desactcam(self):
         self.cameraAct=False
 
     def killall(self):
-        Camera.disconnect()
+        #Camera.disconnect()
         self.desactcam
         self.vid.__del__()
 
@@ -399,21 +430,21 @@ class Application(Tk): #main application for the frame
         
 #-------------------------------------------Revers-----------------------------------------
         if (Nb_Test==1):    
-            pmaker.MountSpetter(1,self)
-            pmaker.MoveStepperFlujo(1,1,500,2.5,self)
-            pmaker.DismountSpetter(1,self)
+            self.pmaker.MountSpetter(1,self)
+            self.pmaker.MoveStepperFlujo(1,1,500,2.5,self)
+            self.pmaker.DismountSpetter(1,self)
             
 #-------------------------------------------Pumping---------------------------------------------
         elif (Nb_Test==2):
-            pmaker.MountSpetter(1,self)
-            pmaker.MoveStepperFlujo(1,0,500,2.5,self)
-            pmaker.DismountSpetter(1,self)
+            self.pmaker.MountSpetter(1,self)
+            self.pmaker.MoveStepperFlujo(1,0,500,2.5,self)
+            self.pmaker.DismountSpetter(1,self)
 
 #--------------------------------------------Experiment---------------------------------------------
         elif (Nb_Test==3):
-            pmaker.MountSpetter(1,self)
-            pmaker.MoveStepperPeriod(1,self.direction,self.Time,self.Flow_uL_s,self)
-            pmaker.DismountSpetter(1,self)
+            self.pmaker.MountSpetter(1,self)
+            self.pmaker.MoveStepperPeriod(1,self.direction,self.Time,self.Flow_uL_s,self)
+            self.pmaker.DismountSpetter(1,self)
 
         #pmaker.ReportVolume,(pmaker.StepperMotor,pmaker.Steps,pmaker.Period_ms,self)
 
@@ -426,10 +457,14 @@ class Application(Tk): #main application for the frame
         self.vid.__del__()
         self.bussy = False
 
+    def __del__(self):
+        if(self.com.is_open):
+            self.com.close()
+        if(self.vid.isOpened()):
+            self.vid.__del__()
+
 
 #############################################main########################################################
-pmaker = FluidController.Communication()
-Camera = CameraController.Communication()
 app=Application() #creates the Frame
 app.directory = filedialog.askdirectory()
 app.title('Microfluid_Ship')

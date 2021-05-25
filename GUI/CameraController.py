@@ -16,23 +16,24 @@ class Parameters:
         self.stepps=1 # default stepps x1
         
 class Communication:
-    def __init__(self):
+    def __init__(self,com):
         self.parameter=Parameters()
-        self.comCamera=serial.Serial(serialList(),115200)
+        self.comCamera=com
+        #self.comCamera=serial.Serial(serialList(),115200)
 
 
-    def connect(self):
-        ports=serialList
-        if(self.comCamera.is_open==False):
-            self.comCamera=serial.Serial(serialList(),115200)
-        self.comCamera.write(("\r\n\r\n").encode('utf-8'))
-        time.sleep(2)   # Wait for grbl to initialize 
-        self.comCamera.flushInput()  # Flush startup text in serial input
-        self.commande="G17 G21 G91 G94 G54"
-        self.sendCommande()
+    #def connect(self):
+    #    ports=serialList
+    #    if(self.comCamera.is_open==False):
+    #        self.comCamera=serial.Serial(serialList(),115200)
+    #    self.comCamera.write(("\r\n\r\n").encode('utf-8'))
+    #    time.sleep(2)   # Wait for grbl to initialize 
+    #    self.comCamera.flushInput()  # Flush startup text in serial input
+    #    self.commande="G17 G21 G91 G94 G54"
+    #    self.sendCommande()
 
-    def disconnect(self):
-        self.comCamera.close()
+    #def disconnect(self):
+    #    self.comCamera.close()
 
     def moveForwardX(self):
         self.commande='G0 X'+str(self.parameter.stepps)
@@ -74,9 +75,9 @@ class Communication:
     def ChangeStepps(self,stepps):
         self.parameter.stepps=stepps
 
-    def __del__(self):
-        if self.comCamera.is_open:
-            self.disconnect()
+    #def __del__(self):
+    #    if self.comCamera.is_open:
+    #        self.disconnect()
 
 
 

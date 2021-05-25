@@ -48,6 +48,7 @@ void setup() {
   mySerial2.begin(115200);
 }
 
+//W1 M1 D1 S100 T350
 void loop() { // run over and over
   int i=0;
   if(Serial.available()){
