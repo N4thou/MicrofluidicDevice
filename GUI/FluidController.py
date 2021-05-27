@@ -171,13 +171,13 @@ class Communication():
         app.display_text.insert('end'," -> %suL a %suL/s \n"%(round(Vol_uL),round(10*Vol_uL/FlowingTime_s)/10))
         app.display_text.update_idletasks()
         
-        fichier =open(app.path+"result.txt",'w')
+        fichier =open(app.path+"/result.txt",'w')
         while (elapsed_time<FlowingTime_s and app.bussy==True):
             elapsed_time = time.time() - start_time
             DepositedVolume=Vol_uL*int(round(elapsed_time))/FlowingTime_s
             app.display_text.delete("insert linestart", "insert lineend")
             app.display_text.insert('end',"**Vol depositado: %s uL"%(min(round(10*DepositedVolume)/10,round(Vol_uL))))
-            fichier.write("%ss %s uL"%(elapsed_time,min(round(10*DepositedVolume)/10,round(Vol_uL))))
+            fichier.write("%ss %s uL \n"%(elapsed_time,min(round(10*DepositedVolume)/10,round(Vol_uL))))
             if app.bussy==True:
                 app.display_text.update_idletasks()
                 #print(app.bussy)
