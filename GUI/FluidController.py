@@ -96,16 +96,6 @@ class Communication():
         output='' 
         print("read")    
         i=0   
-        #while i<4:
-            #temp = self.com.read()
-            #buff=temp.decode('utf-8')
-            #print(temp)
-            #output_temp=output_temp+buff
-            #print(output_temp)
-            #i=i+1
-            #if ("Done" in output_temp):
-                #return output
-            #    break
         self.com.read_until(expected='Done')
 
     def stop(self,app):
