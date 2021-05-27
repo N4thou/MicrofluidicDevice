@@ -232,6 +232,7 @@ class Application(Tk): #main application for the frame
 
     def dir(self):
         self.path=filedialog.askdirectory()+"/%s" %(self.Name)
+        self.pathframes=self.path+"/Frames"
 
     def SaveEntry(self,event):
         self.Flow_uL_s=float(self.e1.get())
@@ -259,7 +260,8 @@ class Application(Tk): #main application for the frame
             self.popupmsg('You have not enter parameters!\n')
         else: 
             os.mkdir(self.path)
-            os.chdir(self.path)
+            os.mkdir(self.pathframes)
+            os.chdir(self.pathframes)
             #app.directory = app.directory +"/%s" %(self.Name)
             self.PushButtonExperiment(3)
             self.expcheck=False

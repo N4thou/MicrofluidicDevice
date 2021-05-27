@@ -143,7 +143,6 @@ class Communication():
         _thread.start_new_thread(self.ReportVolume,(StepperMotor,Phantom_Steps,Phantom_Period_ms,app,))   
         print('Steps')
         print(Total_Steps)
-            
         while Performed_Steps<=Total_Steps:
             Up_Steps=Up_Steps+Up_resto
             cmd = 'W1 M%d D%d S%d T%d' %(StepperMotor, Direction,int(Up_Steps),Period_ms)
@@ -172,15 +171,18 @@ class Communication():
         app.display_text.insert('end'," -> %suL a %suL/s \n"%(round(Vol_uL),round(10*Vol_uL/FlowingTime_s)/10))
         app.display_text.update_idletasks()
         
+        fichier =open(app.path+"result.txt",'w')
         while (elapsed_time<FlowingTime_s and app.bussy==True):
             elapsed_time = time.time() - start_time
             DepositedVolume=Vol_uL*int(round(elapsed_time))/FlowingTime_s
             app.display_text.delete("insert linestart", "insert lineend")
             app.display_text.insert('end',"**Vol depositado: %s uL"%(min(round(10*DepositedVolume)/10,round(Vol_uL))))
+            fichier.write("%ss %s uL"%(elapsed_time,min(round(10*DepositedVolume)/10,round(Vol_uL))))
             if app.bussy==True:
                 app.display_text.update_idletasks()
                 #print(app.bussy)
-                time.sleep(.2)  
+                time.sleep(.2)
+        fichier.close()  
         app.display_text.update_idletasks()                
         app.display_text.delete("insert linestart", "insert lineend")
         app.display_text.update_idletasks()
