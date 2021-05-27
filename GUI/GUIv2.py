@@ -124,14 +124,17 @@ class Application(Tk): #main application for the frame
         self.button5.grid(row=1, column=0, sticky = W)
 
         self.button6 = Button(self, text='move camera',command=self.pushButtonMoveCamera, width = 2*self.column_width, bg="orange")
-        self.button6.grid(row=1, column=8, sticky = W)
+        self.button6.grid(row=0, column=8, sticky = W)
         
-        self.button7 = Button(self, text='start camera',command=self.pushButtonCamera, width = 2*self.column_width, bg="green")
-        self.button7.grid(row=0, column=8, sticky = W)
+        #button used for debug 
+        self.button7 = Button(self, text='test record camera',command=self.pushButtonCamera, width = 2*self.column_width, bg="green")
+        self.button7.grid(row=1, column=99, sticky = W)
         
+        #Logs display
         self.display_text = Text(self, width = 120, height =59)
         self.display_text.grid(row = 2, column = 0,columnspan=5, sticky = W)
 
+        #Video display
         self.display_video= Canvas(self,width = 580,height=480)
         self.display_video.grid(row=2,column=5,columnspan=5,sticky = W)
         
@@ -141,19 +144,21 @@ class Application(Tk): #main application for the frame
         if (self.connected == False):
             self.display_text.insert('end',"Connecting...\n")
             app.display_text.update_idletasks()
-            self.connect()
-            if(self.com.is_open):
+            if(self.connect()):
                 self.display_text.delete('0.0','end')
                 sleep(.5)
                 self.display_text.insert('end',"*****************************CONNECTED*****************************\n")
                 self.button0["text"]="Disconnect"
                 self.button0["bg"]="red"
                 self.connected=True
+            else:
+                self.display_text.insert('end',"No device found \n")
         else:
             self.rec=False
             self.button7["bg"]="green"
             self.cameraAct=False
             self.vid.__del__()
+            self.pmaker.stop(app)
             self.disconnect()
             if (self.bussy==True): 
                 self.bussy=False
@@ -165,7 +170,11 @@ class Application(Tk): #main application for the frame
             self.display_text.update_idletasks()
 
     def connect(self):
-        self.com.open() #start the connection
+        if self.com.port==None:
+            return False
+        else:
+            self.com.open() #start the connection
+            return True
 
     def disconnect(self):
         if self.com.is_open:
@@ -176,7 +185,7 @@ class Application(Tk): #main application for the frame
 ####################################################Parameters########################################################
 
     def PushButtonNew(self):
-        self.display_text.insert('end',"New window\n")
+        #self.display_text.insert('end',"New window\n")
         Experiment_requirement=Tk()        
         Experiment_requirement.geometry("380x130+0+0")
         Experiment_requirement.wm_title("Experiment_requirement")
@@ -295,57 +304,58 @@ class Application(Tk): #main application for the frame
 #---------------part to move the camera-----------------------#
 
     def pushButtonMoveCamera(self):
+        if (self.connected == False):
+            self.display_text.insert('end',"You are not connected\n")
+        else:
+            self.cameraAct=True
+            MovingCamera=Toplevel()
+            MovingCamera.wm_title("MoveCamera")
+            MovingCamera.protocol("WM_DELETE_WINDOW",self.killall)
 
-        self.display_text.insert('end',"New window\n")
-        self.cameraAct=True
-        MovingCamera=Toplevel()
-        MovingCamera.wm_title("MoveCamera")
-        MovingCamera.protocol("WM_DELETE_WINDOW",self.killall)
+            self.display_text.insert('end',"Cameras activate\n")
+            self.display_text.update_idletasks()
 
-        self.display_text.insert('end',"Cameras activate\n")
-        self.display_text.update_idletasks()
+            self.cameraAct=True
+            self.vid=Camerarecord.MyVideoCapture(self.fps)
+            self.starttime=time.time()
+            self.rec=False
+            self.update_frame()
 
-        self.cameraAct=True
-        self.vid=Camerarecord.MyVideoCapture(self.fps)
-        self.starttime=time.time()
-        self.rec=False
-        self.update_frame()
-
-        button12=Button(MovingCamera,text=" Quit ",command=lambda:[self.desactcam,self.vid.__del__(),MovingCamera.destroy()],width = self.column_width,bg="gray73")
-        button12.grid(row=4,column=0)
+            button12=Button(MovingCamera,text=" Quit ",command=lambda:[self.desactcam,self.vid.__del__(),MovingCamera.destroy()],width = self.column_width,bg="gray73")
+            button12.grid(row=4,column=0)
         
-        button13=Button(MovingCamera,text=" /\ (+y) ",command=self.moveFy,width = self.column_width,bg="gray73")
-        button13.grid(row=0,column=1)
+            button13=Button(MovingCamera,text=" /\ (+y) ",command=self.moveFy,width = self.column_width,bg="gray73")
+            button13.grid(row=0,column=1)
         
-        button14=Button(MovingCamera,text="<= (-x)",command=self.moveBx,width = self.column_width,bg="gray73")
-        button14.grid(row=1,column=0)
+            button14=Button(MovingCamera,text="<= (-x)",command=self.moveBx,width = self.column_width,bg="gray73")
+            button14.grid(row=1,column=0)
 
-        button15=Button(MovingCamera,text="=> (+x)",command=self.moveFx,width = self.column_width,bg="gray73")
-        button15.grid(row=1,column=2)
+            button15=Button(MovingCamera,text="=> (+x)",command=self.moveFx,width = self.column_width,bg="gray73")
+            button15.grid(row=1,column=2)
         
-        button16=Button(MovingCamera,text="\/ (-y)",command=self.moveBy,width = self.column_width,bg="gray73")
-        button16.grid(row=2,column=1)
+            button16=Button(MovingCamera,text="\/ (-y)",command=self.moveBy,width = self.column_width,bg="gray73")
+            button16.grid(row=2,column=1)
         
-        button17=Button(MovingCamera,text="reset pos",command=self.rstPos,width = self.column_width,bg="gray73")
-        button17.grid(row=0,column=3)
+            button17=Button(MovingCamera,text="reset pos",command=self.rstPos,width = self.column_width,bg="gray73")
+            button17.grid(row=0,column=3)
 
-        button18=Button(MovingCamera,text="x0.1",command=self.x01,width = self.column_width,bg="gray73")
-        button18.grid(row=1,column=3)
+            button18=Button(MovingCamera,text="x0.1",command=self.x01,width = self.column_width,bg="gray73")
+            button18.grid(row=1,column=3)
 
-        button19=Button(MovingCamera,text="x1",command=self.x1,width = self.column_width,bg="gray73")
-        button19.grid(row=2,column=3)
+            button19=Button(MovingCamera,text="x1",command=self.x1,width = self.column_width,bg="gray73")
+            button19.grid(row=2,column=3)
 
-        button20=Button(MovingCamera,text="x10",command=self.x10,width = self.column_width,bg="gray73")
-        button20.grid(row=3,column=3)
+            button20=Button(MovingCamera,text="x10",command=self.x10,width = self.column_width,bg="gray73")
+            button20.grid(row=3,column=3)
 
-        button21=Button(MovingCamera,text="x100",command=self.x100,width = self.column_width,bg="gray73")
-        button21.grid(row=4,column=3)
+            button21=Button(MovingCamera,text="x100",command=self.x100,width = self.column_width,bg="gray73")
+            button21.grid(row=4,column=3)
 
-        button22=Button(MovingCamera,text="Up (+z)",command=self.moveFz,width = self.column_width,bg="gray73")
-        button22.grid(row=0,column=0)
+            button22=Button(MovingCamera,text="Up (+z)",command=self.moveFz,width = self.column_width,bg="gray73")
+            button22.grid(row=0,column=0)
 
-        button23=Button(MovingCamera,text="Down (-z)",command=self.moveBz,width = self.column_width,bg="gray73")
-        button23.grid(row=2,column=0)
+            button23=Button(MovingCamera,text="Down (-z)",command=self.moveBz,width = self.column_width,bg="gray73")
+            button23.grid(row=2,column=0)
     
     def moveFx(self):
         self.Camera.moveForwardX()
