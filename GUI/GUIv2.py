@@ -117,8 +117,8 @@ class Application(Tk): #main application for the frame
         self.button3 = Button(self, text='New experiment', command=self.PushButtonNew, width = 2*self.column_width, bg="dodger blue")
         self.button3.grid(row=0, column=3, sticky = W)
 
-        self.button4 = Button(self, text='Start experiment', command=self.PushButtonStart, width = 2*self.column_width, bg="dodger blue")
-        self.button4.grid(row=1, column=3, sticky = W)
+        #self.button4 = Button(self, text='Start experiment', command=self.PushButtonStart, width = 2*self.column_width, bg="dodger blue")
+        #self.button4.grid(row=1, column=3, sticky = W)
 
         self.button5 = Button(self, text='Stop experiment', command=self.PushButtonStop, width = 2*self.column_width,state=DISABLED, bg="red")
         self.button5.grid(row=1, column=0, sticky = W)
@@ -156,8 +156,10 @@ class Application(Tk): #main application for the frame
         else:
             self.rec=False
             self.button7["bg"]="green"
-            self.cameraAct=False
-            self.vid.__del__()
+            
+            if(self.cameraAct):
+                self.vid.__del__()
+                self.cameraAct=False
             self.pmaker.stop(app)
             self.disconnect()
             if (self.bussy==True): 
@@ -186,7 +188,8 @@ class Application(Tk): #main application for the frame
 
     def PushButtonNew(self):
         #self.display_text.insert('end',"New window\n")
-        Experiment_requirement=Tk()        
+        #Experiment_requirement=Tk()
+        Experiment_requirement=Toplevel()       
         Experiment_requirement.geometry("380x130+0+0")
         Experiment_requirement.wm_title("Experiment_requirement")
 
@@ -211,7 +214,7 @@ class Application(Tk): #main application for the frame
         self.e3 = Entry(Experiment_requirement)
         self.e3.grid(row=0,column=1)
 
-        button8=Button(Experiment_requirement,text=" Quit ",width = self.column_width, command=Experiment_requirement.destroy,bg="gray73")
+        button8=Button(Experiment_requirement,text="START",width = self.column_width, command=lambda:[self.dir(),self.PushButtonStart(),Experiment_requirement.destroy()],bg="gray73")
         button8.grid(row=6,column=0)
 
         button9=Button(Experiment_requirement,text=" Save ",width = self.column_width,bg="gray73")
@@ -226,7 +229,10 @@ class Application(Tk): #main application for the frame
         self.button11.grid(row=4,column=2)
 
 
-        Experiment_requirement.mainloop()
+        #Experiment_requirement.mainloop()
+
+    def dir(self):
+        app.directory = filedialog.askdirectory()
 
     def SaveEntry(self,event):
         self.Flow_uL_s=float(self.e1.get())
@@ -456,13 +462,13 @@ class Application(Tk): #main application for the frame
     def __del__(self):
         if(self.com.is_open):
             self.com.close()
-        if(self.vid.isOpened()):
+        if(self.cameraAct):
             self.vid.__del__()
 
 
 #############################################main########################################################
 app=Application() #creates the Frame
-app.directory = filedialog.askdirectory()
+app.directory=os.getcwd()
 app.title('Microfluid_Ship')
 #windows
 if (sys.platform.startswith('win')): 

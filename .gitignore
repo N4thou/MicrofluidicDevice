@@ -1,0 +1,5 @@
+*.cf
+*.sav
+*.vcd
+*.rar
+GUI/__pycache__

@@ -8,7 +8,7 @@ class MyVideoCapture:
 
     def __init__(self, fps=None):
     
-        self.video_source = 0
+        self.video_source = 1
         self.width = 400
         self.height = 300
         self.fps = fps
