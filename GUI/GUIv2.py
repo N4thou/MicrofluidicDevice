@@ -108,23 +108,22 @@ class Application(Tk): #main application for the frame
         self.button0 = Button(self, text='Connect', command = self.pushButtonConnect, width = 2*self.column_width, bg="green")
         self.button0.grid(row=0, column=0, sticky = W)
         
+        #button used for debug
         self.button1 = Button(self, text='Revers(500ul)', command=self.PushButtonRevers, width = 2*self.column_width, bg="dodger blue")
-        self.button1.grid(row=0, column=1, sticky = W)
+        self.button1.grid(row=0, column=99, sticky = W)
 
+        #button used for debug
         self.button2 = Button(self, text='Pumping(500ul)', command=self.PushButtonPumping, width = 2*self.column_width, bg="dodger blue")
-        self.button2.grid(row=1, column=1, sticky = W)
+        self.button2.grid(row=1, column=99, sticky = W)
 
         self.button3 = Button(self, text='New experiment', command=self.PushButtonNew, width = 2*self.column_width, bg="dodger blue")
-        self.button3.grid(row=0, column=3, sticky = W)
-
-        #self.button4 = Button(self, text='Start experiment', command=self.PushButtonStart, width = 2*self.column_width, bg="dodger blue")
-        #self.button4.grid(row=1, column=3, sticky = W)
+        self.button3.grid(row=0, column=1, sticky = W)
 
         self.button5 = Button(self, text='Stop experiment', command=self.PushButtonStop, width = 2*self.column_width,state=DISABLED, bg="red")
         self.button5.grid(row=1, column=0, sticky = W)
 
         self.button6 = Button(self, text='move camera',command=self.pushButtonMoveCamera, width = 2*self.column_width, bg="orange")
-        self.button6.grid(row=0, column=8, sticky = W)
+        self.button6.grid(row=1, column=1, sticky = W)
         
         #button used for debug 
         self.button7 = Button(self, text='test record camera',command=self.pushButtonCamera, width = 2*self.column_width, bg="green")
@@ -232,7 +231,7 @@ class Application(Tk): #main application for the frame
         #Experiment_requirement.mainloop()
 
     def dir(self):
-        app.directory = filedialog.askdirectory()
+        self.path=filedialog.askdirectory()+"/%s" %(self.Name)
 
     def SaveEntry(self,event):
         self.Flow_uL_s=float(self.e1.get())
@@ -258,7 +257,10 @@ class Application(Tk): #main application for the frame
     def PushButtonStart(self):
         if(self.expcheck==False):
             self.popupmsg('You have not enter parameters!\n')
-        else:
+        else: 
+            os.mkdir(self.path)
+            os.chdir(self.path)
+            #app.directory = app.directory +"/%s" %(self.Name)
             self.PushButtonExperiment(3)
             self.expcheck=False
 

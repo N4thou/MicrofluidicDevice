@@ -59,30 +59,9 @@ class Communication():
     def __init__(self,com):
         self.parametros = Parametros()
         self.com = com 
-
-    #def connect (self):
-    #    self.com = serial.Serial() # Establish the connection on a specific port
-    #    self.com.port= serialList(self)
-    #    self.com.baudrate= 115200  
-    #    self.com.timeout=1      
-    #    self.com.open()
-    #    #Windows        
-    #    if (self.parametros.Windows == True):
-    #        while not self.com.is_open and not self.com.readable():
-    #            sleep(.5)
-    #    self.com.flushInput()
-    #    self.com.flushOutput()
-    #    sleep(.8)
-
-    #def is_open (self):
-    #    print(self.com.is_open)
-    #    return self.com.is_open
     
     def change_OS(self):
         self.parametros.Windows=abs(self.parametros.Windows-1)
-        
-    #def close(self):
-    #    self.com.close()
         
     def WriteComand(self,cmd,app):
         cmd=cmd+'\n'
