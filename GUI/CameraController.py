@@ -48,8 +48,8 @@ class Communication:
 
     def sendCommande(self):
         self.comCamera.write((self.commande + '\n').encode('utf-8')) # Send g-code block to grbl
-        grbl_out = self.comCamera.readline()
-        print(grbl_out)
+        #grbl_out = self.comCamera.readline()
+        #print(grbl_out)
 
     def ChangeStepps(self,stepps):
         self.parameter.stepps=stepps

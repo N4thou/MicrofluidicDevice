@@ -22,7 +22,7 @@ import numpy as np
 import serial
 import serial.tools.list_ports
 
-#############################Need for serial connection################################
+############################################Need for serial connection########################################
 def serialList(self):
     
     if (sys.platform == 'win32'):
@@ -33,7 +33,7 @@ def serialList(self):
         #For Linux
         return '/dev/ttyS6'
 
-################################Application#############################################
+##############################################Application#####################################################
 
 class Application(Tk): #main application for the frame
 
@@ -56,6 +56,8 @@ class Application(Tk): #main application for the frame
         self.rec=False
         self.frames=np.empty((10,10),None)
         self.img=np.empty((10,10),None)
+        self.pause=False
+        self.pausetime=0.0
         
         #variable for app controle
         self.expcheck=False
@@ -102,6 +104,7 @@ class Application(Tk): #main application for the frame
             app.button7["bg"]="red"
             sleep(.5)
 
+######################################################## Main Menu ###############################################################
     def create_widgets(self):
         self.column_width = 10
         
@@ -125,9 +128,13 @@ class Application(Tk): #main application for the frame
         self.button6 = Button(self, text='move camera',command=self.pushButtonMoveCamera, width = 2*self.column_width, bg="orange")
         self.button6.grid(row=1, column=1, sticky = W)
         
+        
         #button used for debug 
         self.button7 = Button(self, text='test record camera',command=self.pushButtonCamera, width = 2*self.column_width, bg="green")
         self.button7.grid(row=1, column=99, sticky = W)
+
+        self.button8 = Button(self, text='Pause experiment', command=self.PushButtonPause, width = 2*self.column_width,state=DISABLED, bg="red")
+        self.button8.grid(row=0, column=2, sticky = W)
         
         #Logs display
         self.display_text = Text(self, width = 120, height =59)
@@ -183,7 +190,7 @@ class Application(Tk): #main application for the frame
 
     
 
-####################################################Parameters########################################################
+################################################### Parameters #######################################################
 
     def PushButtonNew(self):
         #self.display_text.insert('end',"New window\n")
@@ -276,7 +283,29 @@ class Application(Tk): #main application for the frame
         self.display_text.insert('end',"\n****The Test was Interrupted*********************************************\n")  
         self.display_text.update_idletasks() 
         print("test")
+        if(self.pause):
+            self.PushButtonPause()
         self.button5.config(state=DISABLED)
+        self.button8.config(state=DISABLED)
+    
+    def PushButtonPause(self):
+        if not(self.pause):
+            self.pmaker.pause(app) 
+            self.rec=False
+            self.pause=True
+            self.button8["bg"]="orange"
+            self.button8["text"]="resume"
+            self.display_text.insert('end',"\n****The Test was paused*********************************************\n")
+            self.display_text.update_idletasks()
+        else:
+            self.pausetime=time.time() - self.elapsedtime -self.starttime
+            self.rec=True
+            self.pmaker.pause(app)
+            self.pause=False
+            self.button8["text"]="Pause experiment"
+            self.button8["bg"]="red"
+            self.display_text.insert('end',"\n****The Test continue*********************************************\n")
+            self.display_text.update_idletasks()
 
 ###################################################################Camera################################################
 
@@ -302,7 +331,8 @@ class Application(Tk): #main application for the frame
         ret, frame = self.vid.get_frame()
         if ret:
             if self.rec:
-                cv.imwrite(str(round(time.time()-self.starttime,5))+'.png',  cv.cvtColor(frame, cv.COLOR_RGB2BGR))
+                self.elapsedtime=time.time()-self.starttime-self.pausetime
+                cv.imwrite(str(round(self.elapsedtime,5))+'.png',  cv.cvtColor(frame, cv.COLOR_RGB2BGR))
             self.image = Image.fromarray(frame)
             self.photo = ImageTk.PhotoImage(image=self.image)
             self.display_video.create_image(0, 0, image=self.photo, anchor='nw')
@@ -427,6 +457,7 @@ class Application(Tk): #main application for the frame
             _thread.start_new_thread(self.Ensayo,(Nb_Test,))
 
     def Ensayo(self,Nb_Test):
+        self.button8.config(state=NORMAL)
         self.button5.config(state=NORMAL)
         self.display_text.insert('end',"\n****Experiment start******************************************\n")
         self.cameraAct=True
@@ -455,10 +486,11 @@ class Application(Tk): #main application for the frame
             self.pmaker.MountSpetter(1,self)
             time.sleep(1)
             self.pmaker.MoveStepperPeriod(1,self.direction,self.Time,self.Flow_uL_s,self)
-            time.sleep(1);
+            time.sleep(1)
             self.pmaker.DismountSpetter(1,self)
 
         self.display_text.insert('end',"****Experiment Finish*****************************************\n")
+        self.button8.config(state=DISABLED)
         self.button5.config(state=DISABLED)
         self.display_text.update_idletasks()
         self.rec=False

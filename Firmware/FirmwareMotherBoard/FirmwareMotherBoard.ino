@@ -1,80 +1,42 @@
-#include <SoftwareSerial.h>
+#include <Wire.h>
 
-SoftwareSerial mySerial(10, 11); // RX, TX
-SoftwareSerial mySerial2(5, 6);
+void setup() {
+  Wire.setClock(400000);
+  Wire.begin(); // join i2c bus (address optional for master)
+  Serial.begin(115200);
+}
 
 char buff[100];
 int sizebuff;
-void setup() {
-  Serial.begin(115200); //serial connection to the computer
 
-  mySerial.begin(115200); //serial connection to the pump
-
-  mySerial2.begin(115200); //serial connection to the cameracontroller
-  pinMode(4,OUTPUT);
-  digitalWrite(4,HIGH);
-}
-
-//debug commande for the pump
-//W1 M1 D1 S100 T350
-void loop() { 
-  int i=0;
-  if(Serial.available()){
+void loop() {
+  if(Serial.available())
+  {
     sizebuff=Serial.readBytes(buff,100);
-  
-  if(buff[0]=='W')
-  {
-    if(buff[1]=='X')
+    switch(buff[0])
     {
-      digitalWrite(4,LOW);
-      delay(0.1);
-      digitalWrite(4,HIGH);
-    }else{
-    for(i=0;i<sizebuff;i++)
-    {
-      if(buff[i]!=0)
+      case 'G':
       {
-        mySerial.write(buff[i]);
-        //Serial.print(buff[i]);
-        buff[i]=0;
+        Wire.beginTransmission(8); // transmit to device #8
+        for(int i=2;i<sizebuff;i++)
+        {
+          Wire.write(buff[i]);
+        }
+        Wire.endTransmission();    // stop transmitting 
+        break;
       }
-    }
-    }
-  }
-  else if(buff[0]=='G')
-  {
-    for(i=0;i<sizebuff;i++)
-    {
-      if(buff[i]!=0)
+      case 'W':
       {
-        mySerial2.write(buff[i]);
-        //Serial.print(buff[i]);
-        buff[i]=0;
+        Wire.beginTransmission(9); // transmit to device #8
+        for(int i=0;i<sizebuff;i++)
+        {
+          Wire.write(buff[i]);
+          Serial.println(buff[i]);
+        }
+        Wire.endTransmission();    // stop transmitting 
+        break;
       }
     }
   }
-  }
-  if(mySerial.available()){
-    sizebuff=mySerial.readBytes(buff,100);
-    for(i=0;i<sizebuff;i++)
-    {
-     if(buff[i]!=0)
-      {
-        Serial.write(buff[i]);
-        //Serial.print(buff[i]);
-        buff[i]=0;
-      }
-    }
-  }else if(mySerial2.available()){
-    sizebuff=mySerial2.readBytes(buff,100);
-    for(i=0;i<sizebuff;i++)
-    {
-     if(buff[i]!=0)
-      {
-        Serial.write(buff[i]);
-        //Serial.print(buff[i]);
-        buff[i]=0;
-      }
-    }
-  }
+  //delay(500);
 }

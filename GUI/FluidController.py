@@ -163,6 +163,7 @@ class Communication():
     def ReportVolume(self,StepperMotor,Steps,Period_ms,app):
         print("report")
         start_time = time.time()
+        pause_time = 0.0
         if (StepperMotor==1):
             Vol_uL=Steps/self.parametros.stepper1_StepsXuL
             FlowingTime_s=Steps*Period_ms/1000
@@ -176,7 +177,13 @@ class Communication():
         
         fichier =open(app.path+"/result.txt",'w')
         while (elapsed_time<FlowingTime_s and app.bussy==True):
-            elapsed_time = time.time() - start_time
+            while(app.pause==True):
+                app.button8["bg"]="mint cream"
+                sleep(0.5)
+                app.button8["bg"]="orange"
+                sleep(0.5)
+                pause_time= time.time() - elapsed_time - start_time
+            elapsed_time = time.time() - pause_time - start_time
             DepositedVolume=Vol_uL*int(round(elapsed_time))/FlowingTime_s
             app.display_text.delete("insert linestart", "insert lineend")
             app.display_text.insert('end',"**Vol depositado: %s uL"%(min(round(10*DepositedVolume)/10,round(Vol_uL))))
