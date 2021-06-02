@@ -15,27 +15,27 @@ class Communication:
         self.comCamera=com
 
     def moveForwardX(self):
-        self.commande='G0 X'+str(self.parameter.stepps)
+        self.commande='G X'+str(self.parameter.stepps)
         self.sendCommande()
 
     def moveForwardY(self):
-        self.commande='G0 Y'+str(self.parameter.stepps)
+        self.commande='G Y'+str(self.parameter.stepps)
         self.sendCommande()
 
     def moveForwardZ(self):
-        self.commande='G0 Z'+str(self.parameter.stepps)
+        self.commande='G Z'+str(self.parameter.stepps)
         self.sendCommande()
 
     def moveBackwardX(self):
-        self.commande='G0 X-'+str(self.parameter.stepps)
+        self.commande='G X-'+str(self.parameter.stepps)
         self.sendCommande()
 
     def moveBackwardY(self):
-        self.commande='G0 Y-'+str(self.parameter.stepps)
+        self.commande='G Y-'+str(self.parameter.stepps)
         self.sendCommande()
 
     def moveBackwardZ(self):
-        self.commande='G0 Z-'+str(self.parameter.stepps)
+        self.commande='G Z-'+str(self.parameter.stepps)
         self.sendCommande()
     
     def resetPos(self):

@@ -77,8 +77,11 @@ class Communication():
         i=0   
         self.com.read_until(expected='Done')
 
-    def stop(self,app):
+    def pause(self,app):
         self.WriteComand('WX',app)
+
+    def stop(self,app):
+        self.WriteComand('WZ',app)
         
 
 # Bomba

@@ -1,9 +1,9 @@
-//#include <MeOrion.h>
+#include <Servo.h>
 #include <EEPROM.h>
+#include <Wire.h>
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////Inputs///////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#include <Servo.h>
 
 Servo myservo1;
 Servo myservo2;
@@ -13,11 +13,14 @@ const int buzzer = 9; //buzzer to arduino pin 9
 const int Stepper1_Pul=7;
 const int Stepper1_Dir=6; //define Direction pin
 const int Stepper1_Ena=5; //define Enable Pin
+const int led = 13;
 
 //OTHERS
 char cmd[64];
 int8_t index=0;
-
+bool readend=false;
+bool block=false;
+bool expstop=false;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////StepperMoves////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -50,13 +53,24 @@ void StepperMove(char *cmd){
       }else{
         digitalWrite(Stepper1_Dir,HIGH);
       }  
-      for (int i=0; i<Steps; i++){  
+      for (int i=0; i<Steps; i++){
+        while(block)
+        {
+          digitalWrite(led,HIGH);
+          delay(500);
+          digitalWrite(led,LOW);
+          delay(500);
+          if(expstop) break;
+        }
+        if(expstop) break;
         digitalWrite(Stepper1_Pul,LOW);
         digitalWrite(Stepper1_Pul,HIGH);
         delay(Period);
       }
       break;  
     }
+    block=false;
+    expstop=false;
 }
 
 void mountSpetter(char *cmd){
@@ -70,10 +84,8 @@ void mountSpetter(char *cmd){
       Motor = atoi(str+1);
   }
   
-  switch (Motor){
-    case 1: //Stepper1
-      digitalWrite(Stepper1_Ena,HIGH);
-      break;  
+  if(Motor==1){
+      digitalWrite(Stepper1_Ena,HIGH); 
   }  
 }
 
@@ -88,10 +100,8 @@ void dismountSpetter(char *cmd){
       Motor = atoi(str+1);
   }
   
-  switch (Motor){
-    case 1: //Stepper1
-      digitalWrite(Stepper1_Ena,LOW);
-      break;  
+  if(Motor==1){
+      digitalWrite(Stepper1_Ena,LOW); 
   }  
 }
 
@@ -181,6 +191,7 @@ void parseWcode(char * cmd)
   }
 }
 
+/*
 void ReadAndRun_comand() {
   while (Serial.available()) {
     
@@ -205,13 +216,16 @@ void ReadAndRun_comand() {
       index = 0;
     }
   }
-}
+}*/
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////SETUP AND LOOP///////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void setup() {
+  //I2C
+  Wire.begin(9);
+  Wire.onReceive(receiveEvent);
   //Servos
   myservo1.attach(3);  
   myservo2.attach(4);
@@ -219,16 +233,43 @@ void setup() {
   pinMode (Stepper1_Pul, OUTPUT);
   pinMode (Stepper1_Dir, OUTPUT);
   pinMode (Stepper1_Ena, OUTPUT);
+  pinMode (led,OUTPUT);
+  digitalWrite(led,HIGH);
   //digitalWrite(Stepper1_Ena,HIGH);
     
-  Serial.begin(115200);
-  initRobotSetup();
+  Serial.begin(9600);
+  //initRobotSetup();
   pinMode(buzzer, OUTPUT); 
   //goHome();
 }
 
 void loop() {
-  if (Serial.available()) {
-    ReadAndRun_comand();
+  if (readend) {
+    //ReadAndRun_comand();
+    parseWcode(cmd + 1);
+    Serial.println("Done");
+    index = 0;
+    memset(cmd, 0, 64);
+    readend=false;
+  }
+  delay(1000);
+  Serial.println(readend);
+  
+}
+
+void receiveEvent(int howMany) {
+  while (Wire.available()) { // loop through all but the last
+    char c = Wire.read(); // receive byte as a character
+    cmd[index]=c;
+    Serial.print(cmd[index]);
+    if(c=='X')block=!block;
+    if(c=='Z')expstop=true;
+    if(c=='\n')
+    {
+      Serial.println("end");
+      readend=1;
+    }else{
+      index++;
+    }
   }
 }

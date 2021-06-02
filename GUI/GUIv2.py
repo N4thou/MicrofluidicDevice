@@ -346,8 +346,8 @@ class Application(Tk): #main application for the frame
             button16=Button(MovingCamera,text="\/ (-y)",command=self.moveBy,width = self.column_width,bg="gray73")
             button16.grid(row=2,column=1)
         
-            button17=Button(MovingCamera,text="reset pos",command=self.rstPos,width = self.column_width,bg="gray73")
-            button17.grid(row=0,column=3)
+            #button17=Button(MovingCamera,text="reset pos",command=self.rstPos,width = self.column_width,bg="gray73")
+            #button17.grid(row=0,column=3)
 
             button18=Button(MovingCamera,text="x0.1",command=self.x01,width = self.column_width,bg="gray73")
             button18.grid(row=1,column=3)
@@ -439,7 +439,9 @@ class Application(Tk): #main application for the frame
 #-------------------------------------------Revers-----------------------------------------
         if (Nb_Test==1):    
             self.pmaker.MountSpetter(1,self)
+            
             self.pmaker.MoveStepperFlujo(1,1,500,2.5,self)
+            
             self.pmaker.DismountSpetter(1,self)
             
 #-------------------------------------------Pumping---------------------------------------------
@@ -451,7 +453,9 @@ class Application(Tk): #main application for the frame
 #--------------------------------------------Experiment---------------------------------------------
         elif (Nb_Test==3):
             self.pmaker.MountSpetter(1,self)
+            time.sleep(1)
             self.pmaker.MoveStepperPeriod(1,self.direction,self.Time,self.Flow_uL_s,self)
+            time.sleep(1);
             self.pmaker.DismountSpetter(1,self)
 
         self.display_text.insert('end',"****Experiment Finish*****************************************\n")
