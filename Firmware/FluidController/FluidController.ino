@@ -224,7 +224,7 @@ void ReadAndRun_comand() {
 
 void setup() {
   //I2C
-  Wire.begin(9);
+  Wire.begin('W');
   Wire.onReceive(receiveEvent);
   //Servos
   myservo1.attach(3);  

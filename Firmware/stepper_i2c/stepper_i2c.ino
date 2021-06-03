@@ -18,12 +18,12 @@ Stepper Zaxis(revo, stepZPin, dirZPin );
 
 char buff[100];
 int buffsize = 0;
-float cmd;
+float cmd =0;
 bool block = false;
 bool readend = false;
 
 void setup() {
-  Wire.begin(8);
+  Wire.begin('G');
   Wire.onReceive(receiveEvent);
   Serial.begin(9600);
   pinMode( enPin, OUTPUT);
@@ -36,11 +36,12 @@ void setup() {
 void loop() {
   if (readend)
   {
-    switch (buff[0])
+    cmd = atof(&buff[3]);
+    switch (buff[2])
     {
       case 'X':
         {
-          cmd = atof(&buff[1]);
+          Serial.println("X");
           digitalWrite(enPin, LOW);
           if (cmd >= 1)
           {
@@ -57,8 +58,7 @@ void loop() {
         }
       case 'Y':
         {
-          //Serial.print("Y");
-          cmd = atof(&buff[1]);
+          Serial.println("Y");
           digitalWrite(enPin, LOW);
           if (cmd >= 1)
           {
@@ -75,7 +75,7 @@ void loop() {
         }
       case 'Z':
         {
-          cmd = atof(&buff[1]);
+          Serial.println("Z");
           digitalWrite(enPin, LOW);
           if (cmd >= 1)
           {
@@ -93,7 +93,6 @@ void loop() {
         }
       case 'B':
         {
-          cmd = atoi(&buff[1]);
           if (cmd == 1)
           {
             block = true;
@@ -126,7 +125,7 @@ void receiveEvent(int howMany) {
   while (Wire.available()) { // loop through all but the last
     char c = Wire.read(); // receive byte as a character
     buff[buffsize] = c;
-    //Serial.print(buff[buffsize]);
+    Serial.print(buff[buffsize]);
     if (c == '\n')
     {
       Serial.println("end");

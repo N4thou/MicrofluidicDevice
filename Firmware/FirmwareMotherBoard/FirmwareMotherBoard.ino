@@ -13,30 +13,13 @@ void loop() {
   if(Serial.available())
   {
     sizebuff=Serial.readBytes(buff,100);
-    switch(buff[0])
+    Wire.beginTransmission(buff[0]); // transmit to device #8
+    for(int i=0;i<sizebuff;i++)
     {
-      case 'G':
-      {
-        Wire.beginTransmission(8); // transmit to device #8
-        for(int i=2;i<sizebuff;i++)
-        {
-          Wire.write(buff[i]);
-        }
-        Wire.endTransmission();    // stop transmitting 
-        break;
-      }
-      case 'W':
-      {
-        Wire.beginTransmission(9); // transmit to device #8
-        for(int i=0;i<sizebuff;i++)
-        {
-          Wire.write(buff[i]);
-          Serial.println(buff[i]);
-        }
-        Wire.endTransmission();    // stop transmitting 
-        break;
-      }
+      Wire.write(buff[i]);
+      buff[i]=0;
     }
+    Wire.endTransmission();    // stop transmitting 
   }
   //delay(500);
 }
