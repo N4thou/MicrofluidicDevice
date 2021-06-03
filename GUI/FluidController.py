@@ -111,9 +111,7 @@ class Communication():
     
         cmd = 'W1 M%d D%d S%d T%d' %(StepperMotor, Direction,Steps,Period_ms)
         self.WriteComand(cmd,app)   
-        #_thread.start_new_thread(self.ReportVolume,(StepperMotor,Steps,Period_ms,app,))
-        self.ReportVolume(StepperMotor,Steps,Period_ms,app)
-        #self.WriteComand(cmd,app)
+        self.ReportVolume(Vol_uL,Steps,Period_ms,Flow_uL_s,app)
         sleep(1)
         
     
@@ -128,51 +126,22 @@ class Communication():
         cmd = 'W1 M%d D%d S%d T%d' %(StepperMotor, Direction,Steps,Period_ms)   
         self.WriteComand(cmd,app)
         #_thread.start_new_thread(self.ReportVolume,(StepperMotor,Steps,Period_ms,app,))
-        self.ReportVolume(StepperMotor,Steps,Period_ms,app)
+        self.ReportVolume(Vol_uL,Steps,Period_ms,Flow_uL_s,app)
         sleep(1)
 
-    def MoveStepperFlujoUpDown(self,StepperMotor,Direction,Vol_uL,Flow_uL_s,uL_Up,uL_Down,app):
-        if (StepperMotor==1):
-            Phantom_Steps=self.parametros.stepper1_StepsXuL*Vol_uL
-            Total_Steps=self.parametros.stepper1_StepsXuL*Vol_uL*((uL_Up+uL_Down)/(uL_Up-uL_Down))
-            Up_Steps=self.parametros.stepper1_StepsXuL*uL_Up
-            Down_Steps=self.parametros.stepper1_StepsXuL*uL_Down
-        Time_s=Vol_uL/Flow_uL_s
-        Phantom_Period_ms=int((1000*Time_s)/Phantom_Steps)
-        Period_ms=int((1000*Time_s)/Total_Steps)
-        Performed_Steps=0
-        Up_resto=0
-        Down_resto=0
-        _thread.start_new_thread(self.ReportVolume,(StepperMotor,Phantom_Steps,Phantom_Period_ms,app,))   
-        print('Steps')
-        print(Total_Steps)
-        while Performed_Steps<=Total_Steps:
-            Up_Steps=Up_Steps+Up_resto
-            cmd = 'W1 M%d D%d S%d T%d' %(StepperMotor, Direction,int(Up_Steps),Period_ms)
-            self.WriteComand(cmd,app)
-            Up_resto=Up_Steps-int(Up_Steps)
-            
-            Down_Steps=Down_Steps+Down_resto
-            cmd = 'W1 M%d D%d S%d T%d' %(StepperMotor, abs(Direction-1),int(Down_Steps),Period_ms)
-            self.WriteComand(cmd,app)
-            Down_resto=Down_Steps-int(Down_Steps)
-            
-            Performed_Steps=Performed_Steps+Up_Steps+Down_Steps
-        sleep(1)
-
-    def ReportVolume(self,StepperMotor,Steps,Period_ms,app):
+    def ReportVolume(self,Vol_uL,Steps,Period_ms,Flow_uL_s,app):
         print("report")
         start_time = time.time()
         pause_time = 0.0
-        if (StepperMotor==1):
-            Vol_uL=Steps/self.parametros.stepper1_StepsXuL
-            FlowingTime_s=Steps*Period_ms/1000
+        #Vol_uL=Steps/self.parametros.stepper1_StepsXuL
+        FlowingTime_s=Steps*Period_ms/1000
         elapsed_time = time.time() - start_time
+        
         if hasattr(app, 'liquido'):
             app.display_text.insert('end',"*Inyectando %s" %(app.liquido))
         else:
             app.display_text.insert('end',"*Inyectando liquido")
-        app.display_text.insert('end'," -> %suL a %suL/s \n"%(round(Vol_uL),round(10*Vol_uL/FlowingTime_s)/10))
+        app.display_text.insert('end'," -> %suL a %suL/s \n"%(round(Vol_uL),Flow_uL_s))
         app.display_text.update_idletasks()
         
         fichier =open(app.path+"/result.txt",'w')

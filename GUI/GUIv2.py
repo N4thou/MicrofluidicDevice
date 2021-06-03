@@ -166,10 +166,11 @@ class Application(Tk): #main application for the frame
             if(self.cameraAct):
                 self.vid.__del__()
                 self.cameraAct=False
-            self.pmaker.stop(app)
+            
             self.disconnect()
             if (self.bussy==True): 
                 self.bussy=False
+                self.pmaker.stop(app)
                 self.display_text.insert('end',"\n****The Test was Interrupted*********************************************\n")
             self.display_text.insert('end',"\n****************************DISCONNECTED****************************\n")
             self.button0["text"]="Conect"
