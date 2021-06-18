@@ -78,7 +78,7 @@ class Application(Tk): #main application for the frame
         
 
     def popupmsg(self,msg): 
-        #generate popup message      
+        #generate a popup message      
         popup=Toplevel()        
         popup.geometry("280x75+0+0")
         popup.wm_title("Action required")
@@ -86,7 +86,7 @@ class Application(Tk): #main application for the frame
         w.pack(side="top", fill="x",pady=10)
         B1=Button(popup,text=" Done ", command=popup.destroy)
         B1.pack()
-        popup.mainloop()
+        #popup.mainloop()
     
     def flashingButton(self,Nb_Test): 
         #make button flashing
