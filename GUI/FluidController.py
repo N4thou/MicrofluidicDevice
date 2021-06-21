@@ -87,11 +87,11 @@ class Communication():
 # Bomba
                 
     def MountSpetter(self,StepperMotor,app):
-        cmd = 'W10 M%d' %(StepperMotor) 
+        cmd = 'W10' #%(StepperMotor) 
         self.WriteComand(cmd,app)
     
     def DismountSpetter(self,StepperMotor,app):
-        cmd = 'W11 M%d' %(StepperMotor) 
+        cmd = 'W11' #%(StepperMotor) 
         self.WriteComand(cmd,app)        
         
     def MoveStepper(self,StepperMotor,Direction,Steps,Period,app):

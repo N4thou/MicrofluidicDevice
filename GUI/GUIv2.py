@@ -59,6 +59,7 @@ class Application(Tk): #main application for the frame
         self.pause=False
         self.pausetime=0.0
         
+        self.readtemp=False
         #variable for app controle
         self.expcheck=False
         self.grid()
@@ -91,17 +92,17 @@ class Application(Tk): #main application for the frame
     def flashingButton(self,Nb_Test): 
         #make button flashing
         while (self.bussy==True):
-            if (Nb_Test==1):
-                app.button1["bg"]="mint cream"
-            elif (Nb_Test==2):
-                app.button2["bg"]="mint cream"
-            elif (Nb_Test==8):
-                app.button7["bg"]="mint red"
+            #if (Nb_Test==1):
+                #app.button1["bg"]="mint cream"
+            #elif (Nb_Test==2):
+                #app.button2["bg"]="mint cream"
+            #elif (Nb_Test==8):
+                #app.button7["bg"]="mint red"
             sleep(.5)
             
-            app.button1["bg"]="dodger blue"
-            app.button2["bg"]="dodger blue"
-            app.button7["bg"]="red"
+            #app.button1["bg"]="dodger blue"
+            #app.button2["bg"]="dodger blue"
+            #app.button7["bg"]="red"
             sleep(.5)
 
 ######################################################## Main Menu ###############################################################
@@ -112,12 +113,12 @@ class Application(Tk): #main application for the frame
         self.button0.grid(row=0, column=0, sticky = W)
         
         #button used for debug
-        self.button1 = Button(self, text='Revers(500ul)', command=self.PushButtonRevers, width = 2*self.column_width, bg="dodger blue")
-        self.button1.grid(row=0, column=99, sticky = W)
+        #self.button1 = Button(self, text='Revers(500ul)', command=self.PushButtonRevers, width = 2*self.column_width, bg="dodger blue")
+        #self.button1.grid(row=0, column=99, sticky = W)
 
         #button used for debug
-        self.button2 = Button(self, text='Pumping(500ul)', command=self.PushButtonPumping, width = 2*self.column_width, bg="dodger blue")
-        self.button2.grid(row=1, column=99, sticky = W)
+        #self.button2 = Button(self, text='Pumping(500ul)', command=self.PushButtonPumping, width = 2*self.column_width, bg="dodger blue")
+        #self.button2.grid(row=1, column=99, sticky = W)
 
         self.button3 = Button(self, text='New experiment', command=self.PushButtonNew, width = 2*self.column_width, bg="dodger blue")
         self.button3.grid(row=0, column=1, sticky = W)
@@ -130,20 +131,40 @@ class Application(Tk): #main application for the frame
         
         
         #button used for debug 
-        self.button7 = Button(self, text='test record camera',command=self.pushButtonCamera, width = 2*self.column_width, bg="green")
-        self.button7.grid(row=1, column=99, sticky = W)
+        #self.button7 = Button(self, text='test record camera',command=self.pushButtonCamera, width = 2*self.column_width, bg="green")
+        #self.button7.grid(row=1, column=99, sticky = W)
 
         self.button8 = Button(self, text='Pause experiment', command=self.PushButtonPause, width = 2*self.column_width,state=DISABLED, bg="red")
         self.button8.grid(row=0, column=2, sticky = W)
         
         #Logs display
-        self.display_text = Text(self, width = 120, height =59)
-        self.display_text.grid(row = 2, column = 0,columnspan=5, sticky = W)
+        self.display_text = Text(self)#, width = 120, height =59)
+        self.display_text.grid(column = 0,columnspan=3,row = 2,rowspan=2, sticky = W)
 
         #Video display
-        self.display_video= Canvas(self,width = 580,height=480)
-        self.display_video.grid(row=2,column=5,columnspan=5,sticky = W)
+        image_2 = ImageTk.PhotoImage(file="video_not_working.png")
         
+        self.display_video= Canvas(self)#,width = 580,height=480)
+        self.display_video.grid(row=2,column=5,columnspan=5,sticky = W)
+        self.display_video.create_image(0, 0, image=image_2, anchor='nw')
+        self.display_video.image=image_2
+
+        #dashboard
+        #image1 = Image.open("Microfluidic_device.gif")
+        image_1 = ImageTk.PhotoImage(file="Microfluidic_device.png")
+        #self.dashboard= Label(self,image=image_1)
+        #self.dashboard.image=image_1
+        #self.dashboard.grid(row=3,column=5,sticky = W)
+
+        self.dashboard= Canvas(self,width = 580,height=434)
+        self.dashboard.grid(row=3,column=5,sticky = W)
+        self.dashboard.create_image(0, 0, image=image_1, anchor='nw')
+        self.dashboard.image=image_1
+        self.idtext=self.dashboard.create_text(580/2,434/2,text="temp",fill='red')
+
+
+
+
 
 
     def pushButtonConnect(self):
@@ -157,11 +178,12 @@ class Application(Tk): #main application for the frame
                 self.button0["text"]="Disconnect"
                 self.button0["bg"]="red"
                 self.connected=True
+                self.update_temp()
             else:
                 self.display_text.insert('end',"No device found \n")
         else:
             self.rec=False
-            self.button7["bg"]="green"
+            #self.button7["bg"]="green"
             
             if(self.cameraAct):
                 self.vid.__del__()
@@ -276,9 +298,10 @@ class Application(Tk): #main application for the frame
 
     def PushButtonStop(self):
         self.rec=False
-        self.button7["bg"]="green"
+        #self.button7["bg"]="green"
         self.cameraAct=False
         self.vid.__del__()
+        self.readtemp=False
         self.pmaker.stop(app)
         self.bussy=False
         self.display_text.insert('end',"\n****The Test was Interrupted*********************************************\n")  
@@ -294,6 +317,7 @@ class Application(Tk): #main application for the frame
             self.pmaker.pause(app) 
             self.rec=False
             self.pause=True
+            self.readtemp=False
             self.button8["bg"]="orange"
             self.button8["text"]="resume"
             self.display_text.insert('end',"\n****The Test was paused*********************************************\n")
@@ -302,6 +326,7 @@ class Application(Tk): #main application for the frame
             self.pausetime=time.time() - self.elapsedtime -self.starttime
             self.rec=True
             self.pmaker.pause(app)
+            self.readtemp=True
             self.pause=False
             self.button8["text"]="Pause experiment"
             self.button8["bg"]="red"
@@ -315,7 +340,7 @@ class Application(Tk): #main application for the frame
     def pushButtonCamera(self):
         self.display_text.insert('end',"Cameras button\n")
         if(self.cameraAct==False):
-            self.button7["bg"]="red"
+            #self.button7["bg"]="red"
             self.cameraAct=True
             self.vid=Camerarecord.MyVideoCapture(self.fps)
             self.starttime=time.time()
@@ -323,7 +348,7 @@ class Application(Tk): #main application for the frame
             self.update_frame()
         else:
             self.rec=False
-            self.button7["bg"]="green"
+            #self.button7["bg"]="green"
             self.cameraAct=False
             self.vid.__del__()
             
@@ -438,6 +463,13 @@ class Application(Tk): #main application for the frame
         self.desactcam
         self.vid.__del__()
 
+####################################################temperature############################################################
+    def update_temp(self):
+        if self.connected:
+            self.com.write("T\n".encode('utf-8'))
+            output=self.com.read(size=5)
+            self.dashboard.itemconfigure(self.idtext, text=output)
+            self.after(1000, self.update_temp)
 
 #################################################Tests#####################################################################
 
@@ -487,7 +519,10 @@ class Application(Tk): #main application for the frame
             self.pmaker.MountSpetter(1,self)
             time.sleep(1)
             self.pmaker.MoveStepperPeriod(1,self.direction,self.Time,self.Flow_uL_s,self)
+            self.readtemp=True
+            #self.update_temp()
             time.sleep(1)
+            self.readtemp=False
             self.pmaker.DismountSpetter(1,self)
 
         self.display_text.insert('end',"****Experiment Finish*****************************************\n")
@@ -495,7 +530,7 @@ class Application(Tk): #main application for the frame
         self.button5.config(state=DISABLED)
         self.display_text.update_idletasks()
         self.rec=False
-        self.button7["bg"]="green"
+        #self.button7["bg"]="green"
         self.cameraAct=False
         self.vid.__del__()
         self.bussy = False

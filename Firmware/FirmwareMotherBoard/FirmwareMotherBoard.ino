@@ -14,10 +14,10 @@ int receivesize;
 void loop() {
   if(Serial.available())
   {
-    sizebuff=Serial.readBytes(buff,100);
+    sizebuff=Serial.readBytesUntil('\n',buff,100);
     if(buff[0]=='T')
     {
-      Serial.println("requette");
+      //Serial.println("requette");
       Wire.requestFrom(buff[0],5);
       while (Wire.available()) { // loop through all but the last
         char c = Wire.read(); // receive byte as a character
@@ -36,10 +36,12 @@ void loop() {
       for(int i=0;i<sizebuff;i++)
       {
         Wire.write(buff[i]);
+        //Serial.print(buff[i]);
         buff[i]=0;
       }
+      Wire.write('\n');
       Wire.endTransmission();    // stop transmitting 
     }
   }
-  //delay(500);
+ delay(500);
 }
