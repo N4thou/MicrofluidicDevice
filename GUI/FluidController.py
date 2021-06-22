@@ -87,11 +87,11 @@ class Communication():
 # Bomba
                 
     def MountSpetter(self,StepperMotor,app):
-        cmd = 'W10' #%(StepperMotor) 
+        cmd = 'W10 M1' #%(StepperMotor) 
         self.WriteComand(cmd,app)
     
     def DismountSpetter(self,StepperMotor,app):
-        cmd = 'W11' #%(StepperMotor) 
+        cmd = 'W11 M1' #%(StepperMotor) 
         self.WriteComand(cmd,app)        
         
     def MoveStepper(self,StepperMotor,Direction,Steps,Period,app):
@@ -156,7 +156,7 @@ class Communication():
             DepositedVolume=Vol_uL*int(round(elapsed_time))/FlowingTime_s
             app.display_text.delete("insert linestart", "insert lineend")
             app.display_text.insert('end',"**Vol depositado: %s uL"%(min(round(10*DepositedVolume)/10,round(Vol_uL))))
-            fichier.write("%ss %s uL \n"%(elapsed_time,min(round(10*DepositedVolume)/10,round(Vol_uL))))
+            fichier.write("%ss %s uL %s °C\n"%(round(elapsed_time,5),min(round(10*DepositedVolume)/10,round(Vol_uL)),app.output.decode("utf-8")))
             if app.bussy==True:
                 app.display_text.update_idletasks()
                 #print(app.bussy)

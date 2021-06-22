@@ -67,7 +67,9 @@ class Application(Tk): #main application for the frame
         self.bussy = False
         self.fps=60
         self.delay=int(1000/self.fps)
+        self.output="temp"
         self.create_widgets()
+        
 
         #variable for the connection
         self.com = serial.Serial() # create a Serial object
@@ -160,7 +162,7 @@ class Application(Tk): #main application for the frame
         self.dashboard.grid(row=3,column=5,sticky = W)
         self.dashboard.create_image(0, 0, image=image_1, anchor='nw')
         self.dashboard.image=image_1
-        self.idtext=self.dashboard.create_text(580/2,434/2,text="temp",fill='red')
+        self.idtext=self.dashboard.create_text(580/2,434/2,text=self.output,fill='red')
 
 
 
@@ -467,8 +469,8 @@ class Application(Tk): #main application for the frame
     def update_temp(self):
         if self.connected:
             self.com.write("T\n".encode('utf-8'))
-            output=self.com.read(size=5)
-            self.dashboard.itemconfigure(self.idtext, text=output)
+            self.output=self.com.read(size=5)
+            self.dashboard.itemconfigure(self.idtext, text=self.output)
             self.after(1000, self.update_temp)
 
 #################################################Tests#####################################################################
