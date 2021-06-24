@@ -5,8 +5,9 @@
 ////////////////////////////////////////////////////////////////////Inputs///////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Servo myservo1;
-Servo myservo2;
+Servo myservo;
+
+//int myservo=3;
 
 //Stepper
 const int buzzer = 9; //buzzer to arduino pin 9
@@ -124,10 +125,8 @@ void ServoMove(char *cmd){
   
   switch (Motor){
     case 1: //Servo1
-      myservo1.write(Angle);
-      break;
-    case 2:
-      myservo2.write(Angle);
+      myservo.writeMicroseconds(Angle);
+      //analogWrite(myservo,Angle);
       break;  
   }
 }
@@ -226,9 +225,8 @@ void setup() {
   //I2C
   Wire.begin('W');
   Wire.onReceive(receiveEvent);
-  //Servos
-  myservo1.attach(3);  
-  myservo2.attach(4);
+  //Servos  
+  myservo.attach(10);
   //Stepper
   pinMode (Stepper1_Pul, OUTPUT);
   pinMode (Stepper1_Dir, OUTPUT);
