@@ -15,10 +15,14 @@ const int Stepper1_Pul=7;
 const int Stepper1_Dir=6; //define Direction pin
 const int Stepper1_Ena=5; //define Enable Pin
 const int led = 13;
+const int startstop=3;
 
 //OTHERS
-char cmd[64];
-int8_t index=0;
+//char * buff;
+char cmd[8][64];
+char ref[64]="W11 M1\n";
+int index=0;
+int index_mem=0;
 bool readend=false;
 bool block=false;
 bool expstop=false;
@@ -53,7 +57,7 @@ void StepperMove(char *cmd){
         digitalWrite(Stepper1_Dir,LOW);
       }else{
         digitalWrite(Stepper1_Dir,HIGH);
-      }  
+      } 
       for (int i=0; i<Steps; i++){
         while(block)
         {
@@ -86,10 +90,12 @@ void mountSpetter(char *cmd){
   }
   
   if(Motor==1){
+      Serial.println("mount");
       digitalWrite(Stepper1_Ena,HIGH); 
   }  
 }
 
+//W2 M1 A1000
 void dismountSpetter(char *cmd){
   char * str;
   char * tmp;
@@ -126,7 +132,7 @@ void ServoMove(char *cmd){
   switch (Motor){
     case 1: //Servo1
       myservo.writeMicroseconds(Angle);
-      //analogWrite(myservo,Angle);
+      delay(1000);
       break;  
   }
 }
@@ -149,7 +155,7 @@ void Buzz(char *cmd) {
   noTone(buzzer);     // Stop sound...
 }
  
-void initRobotSetup() {
+/*void initRobotSetup() {
   int i;
   syncRobotSetup();
   for (i = 0; i < 64; i++) {
@@ -161,7 +167,7 @@ void syncRobotSetup() {
   int i;
   for (i = 0; i < 64; i++)
     EEPROM.write(i, cmd[i]);
-}
+}*/
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////W-code///////////////////////////////////////////////////////////////////
@@ -222,6 +228,7 @@ void ReadAndRun_comand() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void setup() {
+  //Serial.setTimeout(2000);
   //I2C
   Wire.begin('W');
   Wire.onReceive(receiveEvent);
@@ -232,7 +239,14 @@ void setup() {
   pinMode (Stepper1_Dir, OUTPUT);
   pinMode (Stepper1_Ena, OUTPUT);
   pinMode (led,OUTPUT);
+  pinMode (startstop,OUTPUT);
   digitalWrite(led,HIGH);
+  digitalWrite(startstop,LOW);
+  
+  //delay(100);
+  //digitalWrite(startstop,LOW);
+  //delay(100);
+  //digitalWrite(startstop,HIGH);
   //digitalWrite(Stepper1_Ena,HIGH);
     
   Serial.begin(9600);
@@ -243,13 +257,31 @@ void setup() {
 
 void loop() {
   if (readend) {
+    digitalWrite(startstop,HIGH);
+    delay(100);
+    digitalWrite(startstop,LOW);
+    for(int i=0;i<=index_mem;i++)
+    {
+      Serial.println(cmd[i]);
+      parseWcode(cmd[i] + 1);
+      memset(cmd[i], 0, 64);
+      Serial.println("Done");
+    }
+    delay(100);
+    digitalWrite(startstop,HIGH);
+    delay(100);
+    digitalWrite(startstop,LOW);
+    myservo.writeMicroseconds(1500);
+    index_mem=0;
+    
     //ReadAndRun_comand();
-    parseWcode(cmd + 1);
-    Serial.println("Done");
+    //parseWcode(cmd + 1);
+    //Serial.println("Done");
     index = 0;
-    memset(cmd, 0, 64);
+    //memset(cmd, 0, 100);
     readend=false;
   }
+  digitalWrite(startstop,LOW);
   delay(1000);
   Serial.println(readend);
   
@@ -258,14 +290,26 @@ void loop() {
 void receiveEvent(int howMany) {
   while (Wire.available()) { // loop through all but the last
     char c = Wire.read(); // receive byte as a character
-    cmd[index]=c;
-    Serial.print(cmd[index]);
+    cmd[index_mem][index]=c;
+    Serial.print(cmd[index_mem][index]);
     if(c=='X')block=!block;
     if(c=='Z')expstop=true;
     if(c=='\n')
     {
       Serial.println("end");
-      readend=1;
+      
+      Serial.println(cmd[index_mem]);
+      //readend=1;
+      //Serial.println(strcmp(ref,cmd[index_mem]));
+      if(!strcmp(ref,cmd[index_mem]))
+         {
+           readend=1;
+           Serial.println("ok");
+      }else{
+        index_mem++;
+        index=0;
+        Serial.println(index_mem);
+      }
     }else{
       index++;
     }

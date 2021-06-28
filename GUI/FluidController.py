@@ -1,5 +1,5 @@
 ################################################################################################################
-##########################################Microfluidic device Code v1.3.1.1#####################################
+###########################################Microfluidic device Code ############################################
 ############################################Code Made By Nathanael.T############################################
 ################################################################################################################
 
@@ -125,9 +125,127 @@ class Communication():
     
         cmd = 'W1 M%d D%d S%d T%d' %(StepperMotor, Direction,Steps,Period_ms)   
         self.WriteComand(cmd,app)
-        #_thread.start_new_thread(self.ReportVolume,(StepperMotor,Steps,Period_ms,app,))
+        #_thread.start_new_thread(self.ReportVolume,(StepperMotor,Steps,Period_ms,Flow_uL_s,app,))
         self.ReportVolume(Vol_uL,Steps,Period_ms,Flow_uL_s,app)
         sleep(1)
+
+
+    #move steppers depend on Time and flow
+    def MoveStepperPeriodOneFluid(self,StepperMotor,Direction,Time_s,Flow_uL_s,app):
+        
+        Vol_uL=Time_s*Flow_uL_s
+        if (StepperMotor==1):
+            Steps=self.parametros.stepper1_StepsXuL*Vol_uL
+        Period_ms=int((1000*Time_s)/Steps)
+        Steps=int(Steps)
+        
+        cmd='W10 M1'
+        self.WriteComand(cmd,app)
+        sleep(0.1)
+        cmd = 'W1 M%d D%d S%d T%d' %(StepperMotor, Direction,Steps,Period_ms)   
+        self.WriteComand(cmd,app)
+        sleep(0.1)
+        cmd = 'W11 M1'
+        self.WriteComand(cmd,app)
+        sleep(0.1)
+        #_thread.start_new_thread(self.ReportVolume,(StepperMotor,Steps,Period_ms,Flow_uL_s,app,))
+        self.ReportVolumeOneFluid(Vol_uL,Steps,Period_ms,Flow_uL_s,app)
+
+
+    #move steppers depend on Time and flow with 2 fluid
+    def MoveStepperPeriodTowFluid(self,StepperMotor,Direction,Time_s_1,Flow_uL_s_1,Time_s_2,Flow_uL_s_2,app):
+        
+        #fluid 1
+        Vol_uL_1=Time_s_1*Flow_uL_s_1
+        Steps_1=self.parametros.stepper1_StepsXuL*Vol_uL_1
+        Period_ms_1=int((1000*Time_s_1)/Steps_1)
+        Steps_1=int(Steps_1)
+
+        #fluid 2
+        Vol_uL_2=Time_s_2*Flow_uL_s_2
+        Steps_2=self.parametros.stepper1_StepsXuL*Vol_uL_2
+        Period_ms_2=int((1000*Time_s_2)/Steps_2)
+        Steps_2=int(Steps_2)
+        
+        cmd='W10 M1'
+        self.WriteComand(cmd,app)
+        sleep(0.1)
+
+        cmd = 'W1 M%d D%d S%d T%d' %(StepperMotor, Direction,Steps_1,Period_ms_1)   
+        self.WriteComand(cmd,app)
+        sleep(0.1)
+
+        cmd='W2 M1 A1000'
+        self.WriteComand(cmd,app)
+        sleep(0.1)
+
+        cmd = 'W1 M%d D%d S%d T%d' %(StepperMotor, Direction,Steps_2,Period_ms_2)   
+        self.WriteComand(cmd,app)
+        sleep(0.1)
+
+        cmd = 'W11 M1'
+        self.WriteComand(cmd,app)
+        sleep(0.1)
+
+        #_thread.start_new_thread(self.ReportVolume,(StepperMotor,Steps,Period_ms,Flow_uL_s,app,))
+        self.ReportVolumeTowFluid(Vol_uL_1,Vol_uL_2,Steps_1,Steps_2,Period_ms_1,Flow_uL_s_1,Period_ms_2,Flow_uL_s_2,app)
+        #sleep(1)
+
+
+    #move steppers depend on Time and flow of tree fluid
+    def MoveStepperPeriodTreeFluid(self,StepperMotor,Direction,Time_s_1,Flow_uL_s_1,Time_s_2,Flow_uL_s_2,Time_s_3,Flow_uL_s_3,app):
+        
+        
+        #fluid 1
+        Vol_uL_1=Time_s_1*Flow_uL_s_1
+        Steps_1=self.parametros.stepper1_StepsXuL*Vol_uL_1
+        Period_ms_1=int((1000*Time_s_1)/Steps_1)
+        Steps_1=int(Steps_1)
+
+        #fluid 2
+        Vol_uL_2=Time_s_2*Flow_uL_s_2
+        Steps_2=self.parametros.stepper1_StepsXuL*Vol_uL_2
+        Period_ms_2=int((1000*Time_s_2)/Steps_2)
+        Steps_2=int(Steps_2)
+
+        #fluid 3
+        Vol_uL_3=Time_s_3*Flow_uL_s_3
+        Steps_3=self.parametros.stepper1_StepsXuL*Vol_uL_3
+        Period_ms_3=int((1000*Time_s_3)/Steps_3)
+        Steps_3=int(Steps_3)
+        
+        cmd='W10 M1'
+        self.WriteComand(cmd,app)
+        sleep(0.1)
+
+        cmd = 'W1 M%d D%d S%d T%d' %(StepperMotor, Direction,Steps_1,Period_ms_1)   
+        self.WriteComand(cmd,app)
+        sleep(0.1)
+
+        cmd='W2 M1 A1000'
+        self.WriteComand(cmd,app)
+        sleep(0.1)
+
+        cmd = 'W1 M%d D%d S%d T%d' %(StepperMotor, Direction,Steps_2,Period_ms_2)   
+        self.WriteComand(cmd,app)
+        sleep(0.1)
+
+        cmd='W2 M1 A500'
+        self.WriteComand(cmd,app)
+        sleep(0.1)
+
+        cmd = 'W1 M%d D%d S%d T%d' %(StepperMotor, Direction,Steps_3,Period_ms_3)   
+        self.WriteComand(cmd,app)
+        sleep(0.1)
+
+        cmd = 'W11 M1'
+        self.WriteComand(cmd,app)
+        sleep(0.1)
+
+        #_thread.start_new_thread(self.ReportVolume,(StepperMotor,Steps,Period_ms,Flow_uL_s,app,))
+        self.ReportVolumeTreeFluid(Vol_uL_1,Vol_uL_2,Vol_uL_3,Steps_1,Steps_2,Steps_3,Period_ms_1,Flow_uL_s_1,Period_ms_2,Flow_uL_s_2,Period_ms_3,Flow_uL_s_3,app)
+        #sleep(1)
+    
 
     def ReportVolume(self,Vol_uL,Steps,Period_ms,Flow_uL_s,app):
         print("report")
@@ -166,6 +284,136 @@ class Communication():
         app.display_text.delete("insert linestart", "insert lineend")
         app.display_text.update_idletasks()
         sleep(1.5)
+
+    def ReportVolumeOneFluid(self,Vol_uL,Steps,Period_ms,Flow_uL_s,app):
+        print("report")
+        start_time = time.time()
+        pause_time = 0.0
+        #Vol_uL=Steps/self.parametros.stepper1_StepsXuL
+        FlowingTime_s=Steps*Period_ms/1000
+        elapsed_time = time.time() - start_time
+        
+        if hasattr(app, 'liquido'):
+            app.display_text.insert('end',"*Inyectando %s" %(app.liquido))
+        else:
+            app.display_text.insert('end',"*Inyectando liquido")
+        app.display_text.insert('end'," -> %suL a %suL/s \n"%(round(Vol_uL),Flow_uL_s))
+        app.display_text.update_idletasks()
+        
+        fichier =open(app.path+"/result.txt",'w')
+        while (elapsed_time<FlowingTime_s and app.bussy==True):
+            while(app.pause==True):
+                app.button8["bg"]="mint cream"
+                sleep(0.5)
+                app.button8["bg"]="orange"
+                sleep(0.5)
+                pause_time= time.time() - elapsed_time - start_time
+            elapsed_time = time.time() - pause_time - start_time
+            DepositedVolume=Vol_uL*int(round(elapsed_time))/FlowingTime_s
+            app.display_text.delete("insert linestart", "insert lineend")
+            app.display_text.insert('end',"**Vol depositado: %s uL"%(min(round(10*DepositedVolume)/10,round(Vol_uL))))
+            fichier.write("%ss %s uL %s °C\n"%(round(elapsed_time,5),min(round(10*DepositedVolume)/10,round(Vol_uL)),app.output.decode("utf-8")))
+            if app.bussy==True:
+                app.display_text.update_idletasks()
+                #print(app.bussy)
+                time.sleep(.2)
+        fichier.close()  
+        app.display_text.update_idletasks()                
+        app.display_text.delete("insert linestart", "insert lineend")
+        app.display_text.update_idletasks()
+        sleep(1.5)
+
+    def ReportVolumeTowFluid(self,Vol_uL_1,Vol_uL_2,Steps_1,Steps_2,Period_ms_1,Flow_uL_s_1,Period_ms_2,Flow_uL_s_2,app):
+        print("report TowFluid")
+        start_time = time.time()
+        pause_time = 0.0
+
+        Vol_uL=Vol_uL_1+Vol_uL_2
+
+        #Vol_uL=Steps/self.parametros.stepper1_StepsXuL
+
+        FlowingTime_s_1=Steps_1*Period_ms_1/1000
+        FlowingTime_s_2=Steps_2*Period_ms_2/1000
+        FlowingTime_s=FlowingTime_s_1+FlowingTime_s_2
+        elapsed_time = time.time() - start_time
+        
+        if hasattr(app, 'liquido'):
+            app.display_text.insert('end',"*Inyectando %s" %(app.liquido))
+        else:
+            app.display_text.insert('end',"*Inyectando liquido")
+        app.display_text.insert('end'," -> %suL a %suL/s \n"%(round(Vol_uL),Flow_uL_s_1))
+        app.display_text.update_idletasks()
+        
+        fichier =open(app.path+"/result.txt",'w')
+        while (elapsed_time<FlowingTime_s and app.bussy==True):
+            while(app.pause==True):
+                app.button8["bg"]="mint cream"
+                sleep(0.5)
+                app.button8["bg"]="orange"
+                sleep(0.5)
+                pause_time= time.time() - elapsed_time - start_time
+            elapsed_time = time.time() - pause_time - start_time
+            DepositedVolume=Vol_uL*int(round(elapsed_time))/FlowingTime_s
+            app.display_text.delete("insert linestart", "insert lineend")
+            app.display_text.insert('end',"**Vol depositado: %s uL"%(min(round(10*DepositedVolume)/10,round(Vol_uL))))
+            fichier.write("%ss %s uL %s °C\n"%(round(elapsed_time,5),min(round(10*DepositedVolume)/10,round(Vol_uL)),app.output.decode("utf-8")))
+            if app.bussy==True:
+                app.display_text.update_idletasks()
+                #print(app.bussy)
+                time.sleep(.2)
+        fichier.close()  
+        app.display_text.update_idletasks()                
+        app.display_text.delete("insert linestart", "insert lineend")
+        app.display_text.update_idletasks()
+        sleep(1.5)
+
+    def ReportVolumeTreeFluid(self,Vol_uL_1,Vol_uL_2,Vol_uL_3,Steps_1,Steps_2,Steps_3,Period_ms_1,Flow_uL_s_1,Period_ms_2,Flow_uL_s_2,Period_ms_3,Flow_uL_s_3,app):
+        print("report TowFluid")
+        start_time = time.time()
+        pause_time = 0.0
+
+        Vol_uL=Vol_uL_1+Vol_uL_2+Vol_uL_3
+
+        #Vol_uL=Steps/self.parametros.stepper1_StepsXuL
+
+        FlowingTime_s_1=Steps_1*Period_ms_1/1000
+        FlowingTime_s_2=Steps_2*Period_ms_2/1000
+        FlowingTime_s_3=Steps_3*Period_ms_3/1000
+
+        FlowingTime_s=FlowingTime_s_1+FlowingTime_s_2+FlowingTime_s_3
+        elapsed_time = time.time() - start_time
+        
+        if hasattr(app, 'liquido'):
+            app.display_text.insert('end',"*Inyectando %s" %(app.liquido))
+        else:
+            app.display_text.insert('end',"*Inyectando liquido")
+        app.display_text.insert('end'," -> %suL a %suL/s \n"%(round(Vol_uL),Flow_uL_s_1))
+        app.display_text.update_idletasks()
+        
+        fichier =open(app.path+"/result.txt",'w')
+        while (elapsed_time<FlowingTime_s and app.bussy==True):
+            while(app.pause==True):
+                app.button8["bg"]="mint cream"
+                sleep(0.5)
+                app.button8["bg"]="orange"
+                sleep(0.5)
+                pause_time= time.time() - elapsed_time - start_time
+            elapsed_time = time.time() - pause_time - start_time
+            DepositedVolume=Vol_uL*int(round(elapsed_time))/FlowingTime_s
+            app.display_text.delete("insert linestart", "insert lineend")
+            app.display_text.insert('end',"**Vol depositado: %s uL"%(min(round(10*DepositedVolume)/10,round(Vol_uL))))
+            fichier.write("%ss %s uL %s °C\n"%(round(elapsed_time,5),min(round(10*DepositedVolume)/10,round(Vol_uL)),app.output.decode("utf-8")))
+            if app.bussy==True:
+                app.display_text.update_idletasks()
+                #print(app.bussy)
+                time.sleep(.2)
+        fichier.close()  
+        app.display_text.update_idletasks()                
+        app.display_text.delete("insert linestart", "insert lineend")
+        app.display_text.update_idletasks()
+        sleep(1.5)
+
+
 
 # Valves       
 

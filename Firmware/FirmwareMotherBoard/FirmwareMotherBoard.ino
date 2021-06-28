@@ -1,12 +1,18 @@
 #include <Wire.h>
+const int interruptpin=3;
+bool check=true;
+bool checkbuff=true;
 
 void setup() {
+  pinMode(interruptpin, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(interruptpin), startstop, RISING);
+  Wire.setTimeout(3000);
   Wire.setClock(400000);
   Wire.begin(); // join i2c bus (address optional for master)
   Serial.begin(115200);
 }
 
-char buff[100];
+char buff[64];
 int sizebuff;
 char receive[10];
 int receivesize;
@@ -14,7 +20,8 @@ int receivesize;
 void loop() {
   if(Serial.available())
   {
-    sizebuff=Serial.readBytesUntil('\n',buff,100);
+    sizebuff=Serial.readBytesUntil('\n',buff,64);
+    //Serial.println(buff);
     if(buff[0]=='T')
     {
       //Serial.println("requette");
@@ -25,7 +32,7 @@ void loop() {
         Serial.print(receive[receivesize]);
         if (c == '\n')
         {
-          Serial.println("end");
+          //Serial.println("end");
         } else {
           receivesize++;
         }
@@ -43,5 +50,19 @@ void loop() {
       Wire.endTransmission();    // stop transmitting 
     }
   }
- delay(500);
+ //delay(500);
+  if(check!=checkbuff)
+  {
+    checkbuff=check;
+    if(check){
+      Serial.print("Start");
+    }else{
+      Serial.print("Stop");
+    }
+  }
+}
+
+void startstop()
+{
+  check=!check;
 }
