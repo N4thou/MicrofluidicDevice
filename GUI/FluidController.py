@@ -27,15 +27,13 @@ def serialList(self):
 
 class Parametros():
     def __init__(self):
-        #Part to ad servo motors tp cpntrole valves
-
         #Servos
         self.servo_IDs=["Buffer","Fe-Fer","Sample", "Test"]
         self.servo1_pos=0
         self.servo2_pos=0
         self.servo1_posList=[105, 105, 15,180]  #this is disctaminated by the 3 wells to be accessed
         self.servo2_posList=[100, 15, 15,180]        #Steppers
-            #Steper1:BombaRoja
+        #Steper1:BombaRoja
         
         self.stepper1_umXpaso=1.7
         
@@ -130,8 +128,10 @@ class Communication():
         sleep(1)
 
 
-    #move steppers depend on Time and flow
+    #move steppers depend on Time and flow for one fluid 
     def MoveStepperPeriodOneFluid(self,StepperMotor,Direction,Time_s,Flow_uL_s,app):
+
+        #all the command sequence is writte in this methode
         
         Vol_uL=Time_s*Flow_uL_s
         if (StepperMotor==1):
@@ -142,13 +142,15 @@ class Communication():
         cmd='W10 M1'
         self.WriteComand(cmd,app)
         sleep(0.1)
+
         cmd = 'W1 M%d D%d S%d T%d' %(StepperMotor, Direction,Steps,Period_ms)   
         self.WriteComand(cmd,app)
         sleep(0.1)
+
         cmd = 'W11 M1'
         self.WriteComand(cmd,app)
         sleep(0.1)
-        #_thread.start_new_thread(self.ReportVolume,(StepperMotor,Steps,Period_ms,Flow_uL_s,app,))
+
         self.ReportVolumeOneFluid(Vol_uL,Time_s,Flow_uL_s,app)
 
 
@@ -370,7 +372,7 @@ class Communication():
                 sleep(2)
             app.display_text.delete("insert linestart", "insert lineend")
             app.display_text.insert('end',"**Vol depositado: %s uL"%(min(round(DepositedVolume,2),round(Vol_uL))))
-            fichier.write("%ss %s uL %s °C\n"%(round(elapsed_time,5),min(round(DepositedVolume,2),round(Vol_uL)),app.output.decode("utf-8")))
+            fichier.write("%ss %s uL %s °C\n"%(round(elapsed_time_total,5),min(round(DepositedVolume,2),round(Vol_uL)),app.output.decode("utf-8")))
             if app.bussy==True:
                 app.display_text.update_idletasks()
                 #print(app.bussy)
@@ -439,7 +441,7 @@ class Communication():
                 sleep(2)
             app.display_text.delete("insert linestart", "insert lineend")
             app.display_text.insert('end',"**Vol depositado: %s uL"%(min(round(DepositedVolume,2),round(Vol_uL))))
-            fichier.write("%ss %s uL %s °C\n"%(round(elapsed_time,5),min(round(DepositedVolume,2),round(Vol_uL)),app.output.decode("utf-8")))
+            fichier.write("%ss %s uL %s °C\n"%(round(elapsed_time_total,5),min(round(DepositedVolume,2),round(Vol_uL)),app.output.decode("utf-8")))
             if app.bussy==True:
                 app.display_text.update_idletasks()
                 #print(app.bussy)
@@ -449,35 +451,4 @@ class Communication():
         app.display_text.delete("insert linestart", "insert lineend")
         app.display_text.update_idletasks()
         sleep(1.5)
-
-
-
-# Valves       
-
-    def Valves2Distr(self,Pos,app):
-        app.display_text.insert('end',"\n**Introduciendo %s \t \t \t"%(self.parametros.servo_IDs[Pos-1]))
-        app.display_text.update_idletasks()
-        self.MoveValves(1,self.parametros.servo1_posList[Pos-1],app)
-        self.MoveValves(2,self.parametros.servo2_posList[Pos-1],app)
         
-    def MoveValves(self,ServoMotor,Angle,app):
-        cmd = 'W2 M%d A%d' %(ServoMotor,Angle)        
-        self.WriteComand(cmd,app) 
-
-    def ChangeValveManually(self,Liquido,app):
-        app.liquido=Liquido
-        _thread.start_new_thread(playsound,('cow.wav',))
-        app.popupmsg('Cambiar válvula a %s' %Liquido)
-        
-# Medir
-
-    def Medir(self,app):
-        #subprocess.call([r'C:\Users\Fran\Drive\Protheus4\5_MedicionFlujo\Control_Bomba_valvulas\RunPSTraceOrder.bat'])
-        sleep(1)
-        cmd = 'W20'   
-        self.WriteComand(cmd,app)
-        
-        app.display_text.update_idletasks()
-        app.display_text.insert('end',"*Comenzando medida\n")
-        app.display_text.update_idletasks()
-#        app.popupmsg('Proceder con la medición')

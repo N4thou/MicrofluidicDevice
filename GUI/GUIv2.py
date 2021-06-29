@@ -60,13 +60,11 @@ class Application(Tk): #main application for the frame
 
         #variable for camera controle
         self.cameraAct=False #check activation of camera
-        self.camera=0 #choose of trhe cameras
         self.rec=False #availability of the a frame
-        self.frames=np.empty((10,10),None)
-        self.img=np.empty((10,10),None)
-        self.pause=False
+        self.frames=np.empty((10,10),None) #init for the frame record
+        self.img=np.empty((10,10),None) #init for the img record
+        self.pause=False 
         self.pausetime=0.0
-        self.readtemp=False #start or stop the record of temperature
 
         #variable for app controle
         self.expcheck=False #check if parameter are enter
@@ -97,23 +95,6 @@ class Application(Tk): #main application for the frame
         w.pack(side="top", fill="x",pady=10)
         B1=Button(popup,text=" Done ", command=popup.destroy)
         B1.pack()
-        #popup.mainloop()
-    
-    def flashingButton(self,Nb_Test): 
-        #make button flashing
-        while (self.bussy==True):
-            #if (Nb_Test==1):
-                #app.button1["bg"]="mint cream"
-            #elif (Nb_Test==2):
-                #app.button2["bg"]="mint cream"
-            #elif (Nb_Test==8):
-                #app.button7["bg"]="mint red"
-            sleep(.5)
-            
-            #app.button1["bg"]="dodger blue"
-            #app.button2["bg"]="dodger blue"
-            #app.button7["bg"]="red"
-            sleep(.5)
 
 ######################################################## Main Menu ###############################################################
     def create_widgets(self):
@@ -160,11 +141,7 @@ class Application(Tk): #main application for the frame
         self.display_video.image=image_2
 
         #dashboard
-        #image1 = Image.open("Microfluidic_device.gif")
         image_1 = ImageTk.PhotoImage(file="Microfluidic_device.png")
-        #self.dashboard= Label(self,image=image_1)
-        #self.dashboard.image=image_1
-        #self.dashboard.grid(row=3,column=5,sticky = W)
 
         self.dashboard= Canvas(self,width = 580,height=434)
         self.dashboard.grid(row=3,column=5,sticky = W)
@@ -188,9 +165,7 @@ class Application(Tk): #main application for the frame
                 self.button0["text"]="Disconnect"
                 self.button0["bg"]="red"
                 self.connected=True
-                self.update_temp()
-                fill=1
-                #_thread.start_new_thread(self.update_temp(),(fill,))
+                self.update_temp() #start the aquisition of the temperature 
             else:
                 self.display_text.insert('end',"No device found \n")
         else:
@@ -228,8 +203,6 @@ class Application(Tk): #main application for the frame
 ################################################### Parameters #######################################################
 
     def PushButtonNew(self):
-        #self.display_text.insert('end',"New window\n")
-        #Experiment_requirement=Tk()
         Experiment_requirement=Toplevel()       
         Experiment_requirement.geometry("380x130+0+0")
         Experiment_requirement.wm_title("number of fluid")
@@ -533,7 +506,6 @@ class Application(Tk): #main application for the frame
         #self.button7["bg"]="green"
         self.cameraAct=False
         self.vid.__del__()
-        self.readtemp=False
         self.pmaker.stop(app)
         self.bussy=False
         self.display_text.insert('end',"\n****The Test was Interrupted*********************************************\n")  
@@ -549,7 +521,6 @@ class Application(Tk): #main application for the frame
             self.pmaker.pause(app) 
             self.rec=False
             self.pause=True
-            self.readtemp=False
             self.button8["bg"]="orange"
             self.button8["text"]="resume"
             self.display_text.insert('end',"\n****The Test was paused*********************************************\n")
@@ -558,7 +529,6 @@ class Application(Tk): #main application for the frame
             self.pausetime=time.time() - self.elapsedtime -self.starttime
             self.rec=True
             self.pmaker.pause(app)
-            self.readtemp=True
             self.pause=False
             self.button8["text"]="Pause experiment"
             self.button8["bg"]="red"
@@ -633,9 +603,6 @@ class Application(Tk): #main application for the frame
         
             button16=Button(MovingCamera,text="\/ (-y)",command=self.moveBy,width = self.column_width,bg="gray73")
             button16.grid(row=2,column=1)
-        
-            #button17=Button(MovingCamera,text="reset pos",command=self.rstPos,width = self.column_width,bg="gray73")
-            #button17.grid(row=0,column=3)
 
             button18=Button(MovingCamera,text="x0.1",command=self.x01,width = self.column_width,bg="gray73")
             button18.grid(row=1,column=3)
@@ -721,7 +688,6 @@ class Application(Tk): #main application for the frame
            self.popupmsg('Wait, an another process is still running!')
         else:
             self.bussy = True
-            _thread.start_new_thread(self.flashingButton,(Nb_Test,))
             _thread.start_new_thread(self.Ensayo,(Nb_Test,))
 
     def Ensayo(self,Nb_Test):
@@ -736,39 +702,31 @@ class Application(Tk): #main application for the frame
         self.display_text.update_idletasks()    
         
 #-------------------------------------------Revers-----------------------------------------
+#usefull for debuging
         if (Nb_Test==1):    
             self.pmaker.MountSpetter(1,self)
-            
             self.pmaker.MoveStepperFlujo(1,1,500,2.5,self)
-            
             self.pmaker.DismountSpetter(1,self)
             
 #-------------------------------------------Pumping---------------------------------------------
+#usefull for debuging
         elif (Nb_Test==2):
             self.pmaker.MountSpetter(1,self)
             self.pmaker.MoveStepperFlujo(1,0,500,2.5,self)
             self.pmaker.DismountSpetter(1,self)
 
 #--------------------------------------------Experiment---------------------------------------------
+        #experiment with one fluid
         elif (Nb_Test==3):
-            #self.pmaker.MountSpetter(1,self)
-            #time.sleep(1)
             self.pmaker.MoveStepperPeriodOneFluid(1,self.direction,self.Time_1,self.Flow_uL_s_1,self)
-            self.readtemp=True
-            #self.update_temp()
-            #time.sleep(1)
-            self.readtemp=False
-            #self.pmaker.DismountSpetter(1,self)
 
+        #expeiment with tow fluid
         elif (Nb_Test==4):
-            self.readtemp=True
             self.pmaker.MoveStepperPeriodTowFluid(1,self.direction,self.Time_1,self.Flow_uL_s_1,self.Time_2,self.Flow_uL_s_2,self)
-            self.readtemp=False
 
+        #exeriment with tree fluid
         elif (Nb_Test==5):
-            self.readtemp=True
             self.pmaker.MoveStepperPeriodTreeFluid(1,self.direction,self.Time_1,self.Flow_uL_s_1,self.Time_2,self.Flow_uL_s_2,self.Time_3,self.Flow_uL_s_3,self)
-            self.readtemp=False
 
         self.display_text.insert('end',"****Experiment Finish*****************************************\n")
         self.button8.config(state=DISABLED)
