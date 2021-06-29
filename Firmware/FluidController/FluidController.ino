@@ -132,7 +132,7 @@ void ServoMove(char *cmd){
   switch (Motor){
     case 1: //Servo1
       myservo.writeMicroseconds(Angle);
-      delay(1000);
+      delay(2000);
       break;  
   }
 }

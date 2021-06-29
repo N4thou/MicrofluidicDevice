@@ -149,7 +149,7 @@ class Communication():
         self.WriteComand(cmd,app)
         sleep(0.1)
         #_thread.start_new_thread(self.ReportVolume,(StepperMotor,Steps,Period_ms,Flow_uL_s,app,))
-        self.ReportVolumeOneFluid(Vol_uL,Steps,Period_ms,Flow_uL_s,app)
+        self.ReportVolumeOneFluid(Vol_uL,Time_s,Flow_uL_s,app)
 
 
     #move steppers depend on Time and flow with 2 fluid
@@ -188,7 +188,7 @@ class Communication():
         sleep(0.1)
 
         #_thread.start_new_thread(self.ReportVolume,(StepperMotor,Steps,Period_ms,Flow_uL_s,app,))
-        self.ReportVolumeTowFluid(Vol_uL_1,Vol_uL_2,Steps_1,Steps_2,Period_ms_1,Flow_uL_s_1,Period_ms_2,Flow_uL_s_2,app)
+        self.ReportVolumeTowFluid(Vol_uL_1,Vol_uL_2,Time_s_1,Time_s_2,Flow_uL_s_1,Flow_uL_s_2,app)
         #sleep(1)
 
 
@@ -243,7 +243,7 @@ class Communication():
         sleep(0.1)
 
         #_thread.start_new_thread(self.ReportVolume,(StepperMotor,Steps,Period_ms,Flow_uL_s,app,))
-        self.ReportVolumeTreeFluid(Vol_uL_1,Vol_uL_2,Vol_uL_3,Steps_1,Steps_2,Steps_3,Period_ms_1,Flow_uL_s_1,Period_ms_2,Flow_uL_s_2,Period_ms_3,Flow_uL_s_3,app)
+        self.ReportVolumeTreeFluid(Vol_uL_1,Vol_uL_2,Vol_uL_3,Time_s_1,Time_s_2,Time_s_3,Flow_uL_s_1,Flow_uL_s_2,Flow_uL_s_3,app)
         #sleep(1)
     
 
@@ -285,12 +285,12 @@ class Communication():
         app.display_text.update_idletasks()
         sleep(1.5)
 
-    def ReportVolumeOneFluid(self,Vol_uL,Steps,Period_ms,Flow_uL_s,app):
+    def ReportVolumeOneFluid(self,Vol_uL,FlowingTime_s,Flow_uL_s,app):
         print("report")
         start_time = time.time()
         pause_time = 0.0
         #Vol_uL=Steps/self.parametros.stepper1_StepsXuL
-        FlowingTime_s=Steps*Period_ms/1000
+        #FlowingTime_s=Steps*Period_ms/1000
         elapsed_time = time.time() - start_time
         
         if hasattr(app, 'liquido'):
@@ -309,10 +309,10 @@ class Communication():
                 sleep(0.5)
                 pause_time= time.time() - elapsed_time - start_time
             elapsed_time = time.time() - pause_time - start_time
-            DepositedVolume=Vol_uL*int(round(elapsed_time))/FlowingTime_s
+            DepositedVolume=round(elapsed_time*Flow_uL_s,2)
             app.display_text.delete("insert linestart", "insert lineend")
-            app.display_text.insert('end',"**Vol depositado: %s uL"%(min(round(10*DepositedVolume)/10,round(Vol_uL))))
-            fichier.write("%ss %s uL %s °C\n"%(round(elapsed_time,5),min(round(10*DepositedVolume)/10,round(Vol_uL)),app.output.decode("utf-8")))
+            app.display_text.insert('end',"**Vol depositado: %s uL"%(min(round(DepositedVolume,2),round(Vol_uL))))
+            fichier.write("%ss %s uL %s °C\n"%(round(elapsed_time,5),min(round(DepositedVolume,2),round(Vol_uL)),app.output.decode("utf-8")))
             if app.bussy==True:
                 app.display_text.update_idletasks()
                 #print(app.bussy)
@@ -323,40 +323,54 @@ class Communication():
         app.display_text.update_idletasks()
         sleep(1.5)
 
-    def ReportVolumeTowFluid(self,Vol_uL_1,Vol_uL_2,Steps_1,Steps_2,Period_ms_1,Flow_uL_s_1,Period_ms_2,Flow_uL_s_2,app):
+    def ReportVolumeTowFluid(self,Vol_uL_1,Vol_uL_2,FlowingTime_s_1,FlowingTime_s_2,Flow_uL_s_1,Flow_uL_s_2,app):
         print("report TowFluid")
         start_time = time.time()
+        start_time_total = start_time
+
         pause_time = 0.0
+        pause_time_total =0.0
+        DepositedVolume_already=0.0
 
         Vol_uL=Vol_uL_1+Vol_uL_2
+        Fluid2=False
 
-        #Vol_uL=Steps/self.parametros.stepper1_StepsXuL
-
-        FlowingTime_s_1=Steps_1*Period_ms_1/1000
-        FlowingTime_s_2=Steps_2*Period_ms_2/1000
         FlowingTime_s=FlowingTime_s_1+FlowingTime_s_2
+        Flow_uL_s_current=Flow_uL_s_1
         elapsed_time = time.time() - start_time
+        elapsed_time_total=time.time() - start_time_total
         
         if hasattr(app, 'liquido'):
-            app.display_text.insert('end',"*Inyectando %s" %(app.liquido))
+            app.display_text.insert('end',"*Injection %s" %(app.liquido))
         else:
-            app.display_text.insert('end',"*Inyectando liquido")
-        app.display_text.insert('end'," -> %suL a %suL/s \n"%(round(Vol_uL),Flow_uL_s_1))
+            app.display_text.insert('end',"*Liquid Injection")
+        app.display_text.insert('end'," -> %suL at %suL/s and %suL at %suL/s\n"%(round(Vol_uL_1),Flow_uL_s_1,round(Vol_uL_2),Flow_uL_s_2))
         app.display_text.update_idletasks()
         
         fichier =open(app.path+"/result.txt",'w')
-        while (elapsed_time<FlowingTime_s and app.bussy==True):
+        while (elapsed_time_total<FlowingTime_s and app.bussy==True):
             while(app.pause==True):
                 app.button8["bg"]="mint cream"
                 sleep(0.5)
                 app.button8["bg"]="orange"
                 sleep(0.5)
                 pause_time= time.time() - elapsed_time - start_time
+                pause_time_total= pause_time_total + pause_time
+            elapsed_time_total = time.time() - pause_time_total - start_time_total
             elapsed_time = time.time() - pause_time - start_time
-            DepositedVolume=Vol_uL*int(round(elapsed_time))/FlowingTime_s
+            DepositedVolume=round(elapsed_time*Flow_uL_s_current,2)+DepositedVolume_already
+            if(round(DepositedVolume)>= Vol_uL_1 and Fluid2 == False):
+                Fluid2=True
+                start_time = time.time()
+                pause_time = 0.0
+                DepositedVolume_already=DepositedVolume
+                Flow_uL_s_current=Flow_uL_s_2
+                app.display_text.insert('end',"Fluid 2")
+                fichier.write("Fluid 2\n")
+                sleep(2)
             app.display_text.delete("insert linestart", "insert lineend")
-            app.display_text.insert('end',"**Vol depositado: %s uL"%(min(round(10*DepositedVolume)/10,round(Vol_uL))))
-            fichier.write("%ss %s uL %s °C\n"%(round(elapsed_time,5),min(round(10*DepositedVolume)/10,round(Vol_uL)),app.output.decode("utf-8")))
+            app.display_text.insert('end',"**Vol depositado: %s uL"%(min(round(DepositedVolume,2),round(Vol_uL))))
+            fichier.write("%ss %s uL %s °C\n"%(round(elapsed_time,5),min(round(DepositedVolume,2),round(Vol_uL)),app.output.decode("utf-8")))
             if app.bussy==True:
                 app.display_text.update_idletasks()
                 #print(app.bussy)
@@ -367,42 +381,65 @@ class Communication():
         app.display_text.update_idletasks()
         sleep(1.5)
 
-    def ReportVolumeTreeFluid(self,Vol_uL_1,Vol_uL_2,Vol_uL_3,Steps_1,Steps_2,Steps_3,Period_ms_1,Flow_uL_s_1,Period_ms_2,Flow_uL_s_2,Period_ms_3,Flow_uL_s_3,app):
+    def ReportVolumeTreeFluid(self,Vol_uL_1,Vol_uL_2,Vol_uL_3,FlowingTime_s_1,FlowingTime_s_2,FlowingTime_s_3,Flow_uL_s_1,Flow_uL_s_2,Flow_uL_s_3,app):
         print("report TowFluid")
         start_time = time.time()
+        start_time_total = start_time
+
         pause_time = 0.0
+        pause_time_total =0.0
+        DepositedVolume_already=0.0
 
         Vol_uL=Vol_uL_1+Vol_uL_2+Vol_uL_3
 
-        #Vol_uL=Steps/self.parametros.stepper1_StepsXuL
-
-        FlowingTime_s_1=Steps_1*Period_ms_1/1000
-        FlowingTime_s_2=Steps_2*Period_ms_2/1000
-        FlowingTime_s_3=Steps_3*Period_ms_3/1000
-
+        Fluid2=False
+        Fluid3=False
+        
         FlowingTime_s=FlowingTime_s_1+FlowingTime_s_2+FlowingTime_s_3
+        Flow_uL_s_current=Flow_uL_s_1
         elapsed_time = time.time() - start_time
+        elapsed_time_total=time.time() - start_time_total
         
         if hasattr(app, 'liquido'):
-            app.display_text.insert('end',"*Inyectando %s" %(app.liquido))
+            app.display_text.insert('end',"*Injection %s" %(app.liquido))
         else:
-            app.display_text.insert('end',"*Inyectando liquido")
-        app.display_text.insert('end'," -> %suL a %suL/s \n"%(round(Vol_uL),Flow_uL_s_1))
+            app.display_text.insert('end',"*Liquid Injection")
+        app.display_text.insert('end'," -> %suL at %suL/s and %suL at %suL/s and %sul at %suL/s\n"%(round(Vol_uL_1),Flow_uL_s_1,round(Vol_uL_2),Flow_uL_s_2,round(Vol_uL_3),Flow_uL_s_3))
         app.display_text.update_idletasks()
         
         fichier =open(app.path+"/result.txt",'w')
-        while (elapsed_time<FlowingTime_s and app.bussy==True):
+        while (elapsed_time_total<FlowingTime_s and app.bussy==True):
             while(app.pause==True):
                 app.button8["bg"]="mint cream"
                 sleep(0.5)
                 app.button8["bg"]="orange"
                 sleep(0.5)
                 pause_time= time.time() - elapsed_time - start_time
+                pause_time_total= pause_time_total + pause_time
+            elapsed_time_total = time.time() - pause_time_total - start_time_total
             elapsed_time = time.time() - pause_time - start_time
-            DepositedVolume=Vol_uL*int(round(elapsed_time))/FlowingTime_s
+            DepositedVolume=round(elapsed_time*Flow_uL_s_current,2)+DepositedVolume_already
+            if(round(DepositedVolume)>= Vol_uL_1 and Fluid2 == False):
+                Fluid2=True
+                start_time = time.time()
+                pause_time = 0.0
+                DepositedVolume_already=DepositedVolume
+                Flow_uL_s_current=Flow_uL_s_2
+                app.display_text.insert('end',"Fluid 2")
+                fichier.write("Fluid 2\n")
+                sleep(2)
+            if(round(DepositedVolume-Vol_uL_1)>= Vol_uL_2 and Fluid3 == False):
+                Fluid3=True
+                start_time = time.time()
+                pause_time = 0.0
+                DepositedVolume_already=DepositedVolume
+                Flow_uL_s_current=Flow_uL_s_3
+                app.display_text.insert('end',"Fluid 3")
+                fichier.write("Fluid 3\n")
+                sleep(2)
             app.display_text.delete("insert linestart", "insert lineend")
-            app.display_text.insert('end',"**Vol depositado: %s uL"%(min(round(10*DepositedVolume)/10,round(Vol_uL))))
-            fichier.write("%ss %s uL %s °C\n"%(round(elapsed_time,5),min(round(10*DepositedVolume)/10,round(Vol_uL)),app.output.decode("utf-8")))
+            app.display_text.insert('end',"**Vol depositado: %s uL"%(min(round(DepositedVolume,2),round(Vol_uL))))
+            fichier.write("%ss %s uL %s °C\n"%(round(elapsed_time,5),min(round(DepositedVolume,2),round(Vol_uL)),app.output.decode("utf-8")))
             if app.bussy==True:
                 app.display_text.update_idletasks()
                 #print(app.bussy)
