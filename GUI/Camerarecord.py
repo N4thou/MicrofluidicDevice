@@ -8,15 +8,20 @@ class MyVideoCapture:
 
     def __init__(self, fps=None):
     
-        self.video_source = 0
+        self.video_source = 1
         self.width = 400
         self.height = 300
         self.fps = fps
+        self.video_available = False
         
         # Open the video source
         self.vid = cv2.VideoCapture(self.video_source)
         if not self.vid.isOpened():
-            raise ValueError("[MyVideoCapture] Unable to open video source", self.video_source)
+            self.video_available = False
+            #raise ValueError("[MyVideoCapture] Unable to open video source", self.video_source) 
+        else:
+            self.video_available = True
+
 
         # Get video source width and height
         if not self.width:
