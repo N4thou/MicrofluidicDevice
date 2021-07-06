@@ -199,23 +199,42 @@ class Communication():
         
         
         #fluid 1
-        Vol_uL_1=Time_s_1*Flow_uL_s_1
-        Steps_1=self.parametros.stepper1_StepsXuL*Vol_uL_1
-        Period_ms_1=int((1000*Time_s_1)/Steps_1)
-        Steps_1=int(Steps_1)
+        if(Time_s_1!=0 and Flow_uL_s_1!=0):
+            Vol_uL_1=Time_s_1*Flow_uL_s_1
+            Steps_1=self.parametros.stepper1_StepsXuL*Vol_uL_1
+            Period_ms_1=int((1000*Time_s_1)/Steps_1)
+            Steps_1=int(Steps_1)
+        else:
+            Vol_uL_1=0.0
+            Steps_1=0.0
+            Period_ms_1=0
+            Steps_1=0
+
 
         #fluid 2
-        Vol_uL_2=Time_s_2*Flow_uL_s_2
-        Steps_2=self.parametros.stepper1_StepsXuL*Vol_uL_2
-        Period_ms_2=int((1000*Time_s_2)/Steps_2)
-        Steps_2=int(Steps_2)
+        if(Time_s_2!=0 and Flow_uL_s_2!=0):
+            Vol_uL_2=Time_s_2*Flow_uL_s_2
+            Steps_2=self.parametros.stepper1_StepsXuL*Vol_uL_2
+            Period_ms_2=int((1000*Time_s_2)/Steps_2)
+            Steps_2=int(Steps_2)
+        else:
+            Vol_uL_2=0.0
+            Steps_2=0.0
+            Period_ms_2=0
+            Steps_2=0
 
         #fluid 3
-        Vol_uL_3=Time_s_3*Flow_uL_s_3
-        Steps_3=self.parametros.stepper1_StepsXuL*Vol_uL_3
-        Period_ms_3=int((1000*Time_s_3)/Steps_3)
-        Steps_3=int(Steps_3)
-        
+        if(Time_s_3!=0 and Flow_uL_s_3!=0):
+            Vol_uL_3=Time_s_3*Flow_uL_s_3
+            Steps_3=self.parametros.stepper1_StepsXuL*Vol_uL_3
+            Period_ms_3=int((1000*Time_s_3)/Steps_3)
+            Steps_3=int(Steps_3)
+        else:
+            Vol_uL_3=0.0
+            Steps_3=0.0
+            Period_ms_3=0
+            Steps_3=0
+
         cmd='W10 M1'
         self.WriteComand(cmd,app)
         sleep(0.1)

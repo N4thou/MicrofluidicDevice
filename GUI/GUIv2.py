@@ -203,21 +203,24 @@ class Application(Tk): #main application for the frame
 ################################################### Parameters #######################################################
 
     def PushButtonNew(self):
-        Experiment_requirement=Toplevel()       
-        Experiment_requirement.geometry("380x130+0+0")
-        Experiment_requirement.wm_title("number of fluid")
+        if (self.connected == False):
+            self.display_text.insert('end',"You are not connected\n")
+        else:
+            Experiment_requirement=Toplevel()       
+            Experiment_requirement.geometry("380x130+0+0")
+            Experiment_requirement.wm_title("number of fluid")
 
-        L1=Label(Experiment_requirement, text="How many fluid in the experiment ?")
-        L1.pack()
+            L1=Label(Experiment_requirement, text="How many fluid in the experiment ?")
+            L1.pack()
 
-        button8=Button(Experiment_requirement,text="1 fluid", command=lambda:[self.Pushbutton1exp(),Experiment_requirement.destroy()],bg="gray73")
-        button8.pack()
+            button8=Button(Experiment_requirement,text="1 fluid", command=lambda:[self.Pushbutton1exp(),Experiment_requirement.destroy()],bg="gray73")
+            button8.pack()
 
-        button9=Button(Experiment_requirement,text="2 fluid", command=lambda:[self.Pushbutton2exp(),Experiment_requirement.destroy()],bg="gray73")
-        button9.pack()
+            button9=Button(Experiment_requirement,text="2 fluid", command=lambda:[self.Pushbutton2exp(),Experiment_requirement.destroy()],bg="gray73")
+            button9.pack()
 
-        button10=Button(Experiment_requirement,text="3 fluid", command=lambda:[self.Pushbutton3exp(),Experiment_requirement.destroy()],bg="gray73")
-        button10.pack()
+            button10=Button(Experiment_requirement,text="3 fluid", command=lambda:[self.Pushbutton3exp(),Experiment_requirement.destroy()],bg="gray73")
+            button10.pack()
 
 #--------------------------------menus for 1 fluid-----------------------------------------#
     def Pushbutton1exp(self):
@@ -246,7 +249,7 @@ class Application(Tk): #main application for the frame
         self.e3 = Entry(one_fluid_experiment)
         self.e3.grid(row=0,column=1)
 
-        button8=Button(one_fluid_experiment,text="START",width = self.column_width, command=lambda:[self.dir(),self.PushButtonStart(3),one_fluid_experiment.destroy()],bg="gray73")
+        button8=Button(one_fluid_experiment,text="START",width = self.column_width, command=lambda:[self.PushButtonStart(3,one_fluid_experiment)],bg="gray73")
         button8.grid(row=6,column=0)
 
         button9=Button(one_fluid_experiment,text=" Save ",width = self.column_width,bg="gray73")
@@ -314,7 +317,7 @@ class Application(Tk): #main application for the frame
         L5=Label(tow_fluid_experiment, text="Direction")
         L5.grid(row=6, column=0)
 
-        button8=Button(tow_fluid_experiment,text="START",width = self.column_width, command=lambda:[self.dir(),self.PushButtonStart(4),tow_fluid_experiment.destroy()],bg="gray73")
+        button8=Button(tow_fluid_experiment,text="START",width = self.column_width, command=lambda:[self.PushButtonStart(4,tow_fluid_experiment)],bg="gray73")
         button8.grid(row=8,column=0)
 
         button9=Button(tow_fluid_experiment,text=" Save ",width = self.column_width,bg="gray73")
@@ -401,7 +404,7 @@ class Application(Tk): #main application for the frame
         L5=Label(tree_fluid_experiment, text="Direction")
         L5.grid(row=6, column=0)
 
-        button8=Button(tree_fluid_experiment,text="START",width = self.column_width, command=lambda:[self.dir(),self.PushButtonStart(5),tree_fluid_experiment.destroy()],bg="gray73")
+        button8=Button(tree_fluid_experiment,text="START",width = self.column_width, command=lambda:[self.PushButtonStart(5,tree_fluid_experiment)],bg="gray73")
         button8.grid(row=8,column=0)
 
         button9=Button(tree_fluid_experiment,text=" Save ",width = self.column_width,bg="gray73")
@@ -425,8 +428,8 @@ class Application(Tk): #main application for the frame
         temp_Flow_uL_s_1=self.e1.get()
         temp_Time_1=self.e2.get()
         #check if paramter are enter
-        if temp_Flow_uL_s_1=='' or temp_Time_1=='':
-            self.popupmsg("You have not enter all parameters!")
+        if temp_Flow_uL_s_1=='' or temp_Time_1=='' or temp_Time_1=='0' or temp_Flow_uL_s_1=='0':
+            self.popupmsg("You have not enter all parameters or they are not valide !")
         else:
             self.Flow_uL_s_1=float(self.e1.get())
             self.Time_1=int(self.e2.get())
@@ -440,61 +443,86 @@ class Application(Tk): #main application for the frame
 
     #saving for 2 fluid
     def SaveEntry2(self,event):
-        self.Name=self.e3.get()
+        temp_Flow_uL_s_1=float(self.e1.get())
+        temp_Time_1=int(self.e2.get())
 
-        self.Flow_uL_s_1=float(self.e1.get())
-        self.Time_1=int(self.e2.get())
+        temp_Flow_uL_s_2=float(self.e4.get())
+        temp_Time_2=int(self.e5.get())
 
-        self.Flow_uL_s_2=float(self.e4.get())
-        self.Time_2=int(self.e5.get())
+        if temp_Flow_uL_s_1=='' or temp_Time_1=='' or temp_Time_1=='0' or temp_Flow_uL_s_1=='0' or temp_Flow_uL_s_2=='' or temp_Time_2=='' or temp_Time_2=='0' or temp_Flow_uL_s_2=='0':
+            self.popupmsg("You have not enter all parameters or they are not valide !")
+        else:
+            self.Name=self.e3.get()
+
+            self.Flow_uL_s_1=float(self.e1.get())
+            self.Time_1=int(self.e2.get())
+
+            self.Flow_uL_s_2=float(self.e4.get())
+            self.Time_2=int(self.e5.get())
         
-        self.expcheck=True
+            self.expcheck=True
 
-        print(self.Name)
-        print(self.Flow_uL_s_1)
-        print(self.Time_1)
-        print(self.Flow_uL_s_2)
-        print(self.Time_2)
-        print(self.direction)
-        self.popupmsg("your entries have been saved")
+            print(self.Name)
+            print(self.Flow_uL_s_1)
+            print(self.Time_1)
+            print(self.Flow_uL_s_2)
+            print(self.Time_2)
+            print(self.direction)
+            self.popupmsg("your entries have been saved")
 
     #saving for 3 fluid
     def SaveEntry3(self,event):
-        self.Flow_uL_s_1=float(self.e1.get())
-        self.Time_1=int(self.e2.get())
-        self.Name=self.e3.get()
+        temp_Flow_uL_s_1=float(self.e1.get())
+        temp_Time_1=int(self.e2.get())
+        
 
-        self.Flow_uL_s_2=float(self.e4.get())
-        self.Time_2=int(self.e5.get())
+        temp_Flow_uL_s_2=float(self.e4.get())
+        temp_Time_2=int(self.e5.get())
 
-        self.Flow_uL_s_3=float(self.e6.get())
-        self.Time_3=int(self.e7.get())
+        temp_Flow_uL_s_3=float(self.e6.get())
+        temp_Time_3=int(self.e7.get())
 
-        self.expcheck=True
-        print(self.Name)
-        print(self.Flow_uL_s_1)
-        print(self.Time_1)
-        print(self.Flow_uL_s_2)
-        print(self.Time_2)
-        print(self.Flow_uL_s_3)
-        print(self.Time_3)
-        print(self.direction)
-        self.popupmsg("your entries have been saved")
+        if temp_Flow_uL_s_1=='' or temp_Time_1=='' or temp_Flow_uL_s_2=='' or temp_Time_2=='' or temp_Flow_uL_s_3=='' or temp_Time_3=='':
+            self.popupmsg("You have not enter all parameters or they are not valide !")
+        else:
+            self.Name=self.e3.get()
+
+            self.Flow_uL_s_1=float(self.e1.get())
+            self.Time_1=int(self.e2.get())
+
+            self.Flow_uL_s_2=float(self.e4.get())
+            self.Time_2=int(self.e5.get())
+
+            self.Flow_uL_s_3=float(self.e6.get())
+            self.Time_3=int(self.e7.get())
+
+            self.expcheck=True
+            print(self.Name)
+            print(self.Flow_uL_s_1)
+            print(self.Time_1)
+            print(self.Flow_uL_s_2)
+            print(self.Time_2)
+            print(self.Flow_uL_s_3)
+            print(self.Time_3)
+            print(self.direction)
+            self.popupmsg("your entries have been saved")
 
     def pushButtonPumping(self):
-        self.direction=0
+        self.direction=1
         self.button10["bg"]="mint cream"
         self.button11["bg"]="gray73"
     
     def pushButtonRevers(self):
-        self.direction=1
+        self.direction=0
         self.button11["bg"]="mint cream"
         self.button10["bg"]="gray73"
     
-    def PushButtonStart(self,exp):
+    def PushButtonStart(self,exp,window):
         if(self.expcheck==False):
             self.popupmsg('You have not enter or save parameters!\n')
-        else: 
+        else:
+            window.destroy()
+            self.dir()
             os.mkdir(self.path)
             os.mkdir(self.pathframes)
             os.chdir(self.pathframes)
